@@ -1,0 +1,393 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kubernetes · AZ-OPS Readiness Board</title>
+<meta name="description" content="Scenario-based interview prep for Senior Azure DevOps / Cloud Architect roles — Kubernetes, CI/CD, IaC, monitoring, incident response, DevSecOps and Azure architecture.">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="statusbar">
+      <span class="dot"></span><b>ALL SYSTEMS NOMINAL</b><span class="sep">|</span>
+      <span>module: <b>Kubernetes</b></span><span class="sep">|</span>
+      <span>env: <b>interview-prep</b></span><span class="sep">|</span>
+      <span>region: <b>study-local</b></span>
+      <span class="fill"></span>
+      <span data-live-clock>00:00:00 UTC</span>
+    </div>
+  <div class="header-inner">
+    <a class="brand" href="index.html">
+      <span class="mark">AZ</span>
+      <span>AZ-OPS Board<small>Senior Azure DevOps &middot; Interview Readiness</small></span>
+    </a>
+    <button class="nav-toggle" aria-label="Toggle navigation">MENU</button>
+    <nav class="main-nav">
+        <a href="index.html">Overview</a>
+        <a href="kubernetes.html" class="active">Kubernetes</a>
+        <a href="cicd-git.html">CI/CD & Git</a>
+        <a href="iac.html">IaC</a>
+        <a href="monitoring-incident.html">Monitoring & Incidents</a>
+        <a href="devsecops.html">DevSecOps</a>
+        <a href="azure-landing-zone.html">Landing Zone & DR</a>
+        <a href="azure-networking.html">Networking</a>
+        <a href="azure-identity-security.html">Identity & Security</a>
+        <a href="scenarios.html">Scenario Bank</a>
+    </nav>
+  </div>
+</header>
+<main>
+<div class="shell page-hero">
+  <div class="eyebrow"><span class="dot" style="background:var(--k8s); box-shadow:0 0 6px var(--k8s);"></span> Module 01</div>
+  <h1>Kubernetes: cluster admin to production troubleshooting</h1>
+  <p class="lede">The JD line reads "expertise in Kubernetes including cluster administration, workload management, networking, ingress, autoscaling, Helm, troubleshooting, security, production-grade deployments." That's basically the whole SRE surface area of K8s. Start with the map, then work the incident queue.</p>
+</div>
+
+<div class="shell section">
+  <div class="section-head"><div><h2>The cluster, end to end</h2>
+  <p class="section-desc">Every troubleshooting question maps back to this picture. When something breaks, you're locating <em>which box</em> failed.</p></div></div>
+
+  <div class="diagram-frame">
+    <svg viewBox="0 0 1180 480" xmlns="http://www.w3.org/2000/svg" font-family="JetBrains Mono, monospace">
+      <defs>
+        <marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#5d7284"/></marker>
+      </defs>
+      <!-- External -->
+      <rect x="20" y="30" width="150" height="50" rx="8" fill="none" stroke="#3fa9f5" stroke-width="1.5"/>
+      <text x="95" y="50" fill="#e7edf3" font-size="12" text-anchor="middle">Client / Internet</text>
+      <text x="95" y="66" fill="#6d7d8d" font-size="9" text-anchor="middle">HTTPS request</text>
+
+      <rect x="20" y="120" width="150" height="50" rx="8" fill="rgba(63,169,245,0.1)" stroke="#3fa9f5" stroke-width="1.5"/>
+      <text x="95" y="140" fill="#e7edf3" font-size="12" text-anchor="middle">LoadBalancer</text>
+      <text x="95" y="156" fill="#6d7d8d" font-size="9" text-anchor="middle">Azure LB / Public IP</text>
+
+      <line x1="95" y1="80" x2="95" y2="120" stroke="#5d7284" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+      <!-- Control plane -->
+      <rect x="230" y="20" width="340" height="150" rx="10" fill="rgba(139,123,240,0.06)" stroke="#4b3f96" stroke-width="1.5" stroke-dasharray="4 3"/>
+      <text x="246" y="38" fill="#8b7bf0" font-size="10" letter-spacing="1">CONTROL PLANE</text>
+      <g font-size="10.5" fill="#e7edf3">
+        <rect x="246" y="48" width="145" height="40" rx="6" fill="#161f2a" stroke="#212c39"/>
+        <text x="318" y="72" text-anchor="middle">kube-apiserver</text>
+        <rect x="410" y="48" width="145" height="40" rx="6" fill="#161f2a" stroke="#212c39"/>
+        <text x="482" y="72" text-anchor="middle">etcd (state store)</text>
+        <rect x="246" y="100" width="145" height="40" rx="6" fill="#161f2a" stroke="#212c39"/>
+        <text x="318" y="124" text-anchor="middle">scheduler</text>
+        <rect x="410" y="100" width="145" height="40" rx="6" fill="#161f2a" stroke="#212c39"/>
+        <text x="482" y="124" text-anchor="middle">controller-manager</text>
+      </g>
+
+      <line x1="170" y1="145" x2="318" y2="68" stroke="#5d7284" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+      <!-- Worker nodes -->
+      <rect x="230" y="210" width="920" height="240" rx="10" fill="rgba(53,211,153,0.04)" stroke="#1a232e" stroke-width="1.5"/>
+      <text x="246" y="228" fill="#35d399" font-size="10" letter-spacing="1">WORKER NODE POOL (VMSS)</text>
+
+      <!-- node 1 -->
+      <g>
+        <rect x="250" y="245" width="270" height="185" rx="8" fill="#121922" stroke="#212c39"/>
+        <text x="264" y="264" fill="#a9b6c4" font-size="10">node-1</text>
+        <rect x="264" y="274" width="110" height="26" rx="5" fill="#161f2a" stroke="#212c39"/>
+        <text x="319" y="291" fill="#e7edf3" font-size="9" text-anchor="middle">kubelet</text>
+        <rect x="384" y="274" width="120" height="26" rx="5" fill="#161f2a" stroke="#212c39"/>
+        <text x="444" y="291" fill="#e7edf3" font-size="9" text-anchor="middle">kube-proxy</text>
+        <rect x="264" y="310" width="90" height="42" rx="6" fill="rgba(63,169,245,0.12)" stroke="#3fa9f5"/>
+        <text x="309" y="328" fill="#e7edf3" font-size="8.5" text-anchor="middle">pod: api</text>
+        <text x="309" y="340" fill="#6d7d8d" font-size="7.5" text-anchor="middle">req/lim set</text>
+        <rect x="366" y="310" width="90" height="42" rx="6" fill="rgba(63,169,245,0.12)" stroke="#3fa9f5"/>
+        <text x="411" y="328" fill="#e7edf3" font-size="8.5" text-anchor="middle">pod: api</text>
+        <text x="411" y="340" fill="#6d7d8d" font-size="7.5" text-anchor="middle">replica</text>
+        <rect x="264" y="364" width="192" height="42" rx="6" fill="rgba(139,123,240,0.1)" stroke="#4b3f96"/>
+        <text x="360" y="382" fill="#e7edf3" font-size="8.5" text-anchor="middle">DaemonSet: log-agent</text>
+        <text x="360" y="394" fill="#6d7d8d" font-size="7.5" text-anchor="middle">one per node</text>
+      </g>
+
+      <!-- node 2 -->
+      <g>
+        <rect x="540" y="245" width="270" height="185" rx="8" fill="#121922" stroke="#212c39"/>
+        <text x="554" y="264" fill="#a9b6c4" font-size="10">node-2</text>
+        <rect x="554" y="274" width="110" height="26" rx="5" fill="#161f2a" stroke="#212c39"/>
+        <text x="609" y="291" fill="#e7edf3" font-size="9" text-anchor="middle">kubelet</text>
+        <rect x="674" y="274" width="120" height="26" rx="5" fill="#161f2a" stroke="#212c39"/>
+        <text x="734" y="291" fill="#e7edf3" font-size="9" text-anchor="middle">kube-proxy</text>
+        <rect x="554" y="310" width="90" height="42" rx="6" fill="rgba(245,166,35,0.12)" stroke="#f5a623"/>
+        <text x="599" y="328" fill="#e7edf3" font-size="8.5" text-anchor="middle">pod: worker</text>
+        <text x="599" y="340" fill="#6d7d8d" font-size="7.5" text-anchor="middle">CrashLoop!</text>
+        <rect x="656" y="310" width="90" height="42" rx="6" fill="rgba(53,211,153,0.12)" stroke="#35d399"/>
+        <text x="701" y="328" fill="#e7edf3" font-size="8.5" text-anchor="middle">StatefulSet</text>
+        <text x="701" y="340" fill="#6d7d8d" font-size="7.5" text-anchor="middle">db-0 + PVC</text>
+        <rect x="554" y="364" width="192" height="42" rx="6" fill="rgba(240,85,90,0.08)" stroke="#f0555a" stroke-dasharray="3 2"/>
+        <text x="650" y="382" fill="#e7edf3" font-size="8.5" text-anchor="middle">NetworkPolicy: deny-all</text>
+        <text x="650" y="394" fill="#6d7d8d" font-size="7.5" text-anchor="middle">ingress restricted</text>
+      </g>
+
+      <!-- ingress controller -->
+      <g>
+        <rect x="830" y="245" width="300" height="90" rx="8" fill="rgba(63,169,245,0.08)" stroke="#3fa9f5"/>
+        <text x="980" y="266" fill="#3fa9f5" font-size="10" text-anchor="middle">Ingress Controller (NGINX / AGIC)</text>
+        <text x="980" y="284" fill="#a9b6c4" font-size="9" text-anchor="middle">host + path routing rules</text>
+        <text x="980" y="300" fill="#a9b6c4" font-size="9" text-anchor="middle">TLS termination</text>
+        <text x="980" y="316" fill="#a9b6c4" font-size="9" text-anchor="middle">→ routes to Service → pod endpoints</text>
+      </g>
+
+      <g>
+        <rect x="830" y="350" width="300" height="65" rx="8" fill="rgba(139,123,240,0.08)" stroke="#4b3f96"/>
+        <text x="980" y="373" fill="#8b7bf0" font-size="10" text-anchor="middle">HPA / VPA Controller</text>
+        <text x="980" y="390" fill="#a9b6c4" font-size="9" text-anchor="middle">watches CPU/mem metrics → scales replicas or requests</text>
+      </g>
+
+      <line x1="95" y1="170" x2="95" y2="330" stroke="#5d7284" stroke-width="1.5"/>
+      <line x1="95" y1="330" x2="830" y2="290" stroke="#5d7284" stroke-width="1.5" marker-end="url(#arrow)"/>
+    </svg>
+    <div class="legend">
+      <span><i style="background:#3fa9f5"></i>control / traffic path</span>
+      <span><i style="background:#8b7bf0"></i>DaemonSet / autoscaling</span>
+      <span><i style="background:#35d399"></i>stateful workload</span>
+      <span><i style="background:#f0555a"></i>failure point in this diagram</span>
+    </div>
+    <div class="diagram-caption">// api-server is the only component every other piece talks to — etcd is truth, kubelet is the node agent, kube-proxy programs iptables/IPVS rules for Services.</div>
+  </div>
+</div>
+
+<div class="shell section">
+  <div class="section-head"><div><h2>Autoscaling: HPA vs VPA vs Cluster Autoscaler</h2>
+  <p class="section-desc">A classic senior question: "traffic spiked and pods didn't scale — why?" You need to know which of three independent controllers was supposed to react.</p></div></div>
+
+  <div class="tbl-wrap">
+    <table class="cmp">
+      <tr><th>Controller</th><th>Scales what</th><th>Trigger</th><th>Common failure mode</th></tr>
+      <tr><td><strong>HPA</strong><br>Horizontal Pod Autoscaler</td><td>Replica <strong>count</strong> of a Deployment/StatefulSet</td><td>CPU/mem % vs. requests, or custom/external metrics via metrics-server or KEDA</td><td>No <code>resources.requests</code> set → HPA has nothing to divide against and refuses to scale</td></tr>
+      <tr><td><strong>VPA</strong><br>Vertical Pod Autoscaler</td><td><strong>Requests/limits</strong> of a pod's containers</td><td>Historical usage recommendation engine</td><td>Running HPA and VPA on CPU for the same workload fight each other — VPA resizes, HPA reacts to the resize</td></tr>
+      <tr><td><strong>Cluster Autoscaler</strong></td><td>Number of <strong>nodes</strong> in a node pool</td><td>Unschedulable pods (pending due to insufficient node capacity)</td><td>PodDisruptionBudget or anti-affinity rules prevent scale-down even when nodes are idle</td></tr>
+    </table>
+  </div>
+  <div class="callout tip"><div class="ico">i</div><p><strong>Interview line that lands:</strong> "HPA answers 'do we need more copies,' VPA answers 'does each copy need more room,' Cluster Autoscaler answers 'do we have anywhere to put them.' They operate on different axes and can be combined carefully — never HPA+VPA on the same metric for the same workload.</p></div>
+</div>
+
+<div class="shell section">
+  <div class="section-head"><div><h2>Incident queue — Kubernetes</h2>
+  <p class="section-desc">Click a ticket to expand. Each one mirrors a real "walk me through it" prompt.</p></div>
+  <div><button class="filter-btn active" data-action="expand-all" onclick="document.querySelectorAll('.ticket').forEach(t=>t.classList.add('open'))" style="font-family:var(--font-mono);font-size:11px;padding:6px 12px;border-radius:100px;border:1px solid var(--border);background:var(--bg-raised);color:var(--text-dim);cursor:pointer;">Expand all</button></div>
+  </div>
+
+  <div class="ticket" data-sev="1">
+    <div class="ticket-head"><span class="ticket-id">K8S-101</span><span class="sev-badge s1">SEV-1</span><span class="ticket-q">A pod keeps restarting in <code>CrashLoopBackOff</code>. Walk me through your diagnosis.</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <p class="sub">Diagnose</p>
+      <ul>
+        <li><code>kubectl get pods -o wide</code> — confirm restart count and node placement.</li>
+        <li><code>kubectl describe pod &lt;pod&gt;</code> — check the <strong>Events</strong> section and last termination reason/exit code.</li>
+        <li><code>kubectl logs &lt;pod&gt; --previous</code> — the crashed container's logs, not the new attempt.</li>
+        <li>Exit code 1 = app error; 137 = SIGKILL, almost always <strong>OOMKilled</strong>; 143 = SIGTERM, graceful shutdown didn't finish in time.</li>
+      </ul>
+      <div class="resolution-box">
+        <p class="sub">Resolution</p>
+        <p>Match the exit code to a cause: bad config/env var → fix and redeploy; OOMKilled → raise <code>resources.limits.memory</code> or fix a leak; failing liveness probe → the app is up but the probe path/port/timing is wrong, not the app itself.</p>
+      </div>
+      <div class="pitfall-box">
+        <p class="sub">Pitfall</p>
+        <p>Candidates jump straight to "increase the memory limit" without reading <code>--previous</code> logs first — that's guessing, not diagnosing. Always show the evidence before the fix.</p>
+      </div>
+      <div class="ticket-tags"><span class="tag violet">workloads</span><span class="tag red">troubleshooting</span></div>
+    </div>
+  </div>
+
+  <div class="ticket" data-sev="2">
+    <div class="ticket-head"><span class="ticket-id">K8S-102</span><span class="sev-badge s2">SEV-2</span><span class="ticket-q">A new image was pushed but the deployment shows <code>ImagePullBackOff</code>.</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <p class="sub">Diagnose</p>
+      <ul>
+        <li><code>kubectl describe pod</code> Events will show the exact error: unauthorized, manifest unknown, or timeout.</li>
+        <li>Unauthorized → registry auth (<code>imagePullSecrets</code>) missing, expired, or not attached to the ServiceAccount.</li>
+        <li>Manifest unknown → tag doesn't exist (typo, or CI pushed to the wrong repo/tag).</li>
+        <li>Timeout → node can't reach the registry — check egress/firewall or private endpoint for ACR.</li>
+      </ul>
+      <div class="resolution-box"><p class="sub">Resolution</p><p>For AKS + ACR, prefer <code>az aks update --attach-acr</code> (grants AcrPull via managed identity) over long-lived pull secrets — removes an entire class of "secret expired" incidents.</p></div>
+      <div class="ticket-tags"><span class="tag violet">workloads</span><span class="tag blue">registry</span></div>
+    </div>
+  </div>
+
+  <div class="ticket" data-sev="1">
+    <div class="ticket-head"><span class="ticket-id">K8S-103</span><span class="sev-badge s1">SEV-1</span><span class="ticket-q">One node shows <code>NotReady</code> and its pods are stuck. What's your response?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <p class="sub">Diagnose</p>
+      <ul>
+        <li><code>kubectl describe node &lt;node&gt;</code> — check Conditions: MemoryPressure, DiskPressure, PIDPressure, kubelet heartbeat age.</li>
+        <li><code>kubectl get events --field-selector involvedObject.name=&lt;node&gt;</code> for kubelet/network plugin errors.</li>
+        <li>If it's a cloud VM, check the VMSS instance health in the Azure portal — could be an underlying host issue.</li>
+      </ul>
+      <div class="resolution-box"><p class="sub">Resolution</p><p>If the node is unrecoverable within your SLA: <code>kubectl cordon</code> to stop new scheduling, <code>kubectl drain --ignore-daemonsets --delete-emptydir-data</code> to evict workloads safely (respecting PodDisruptionBudgets), then let Cluster Autoscaler or the node pool replace it. Never force-delete a node with stateful pods still attached to PVCs without confirming failover.</p></div>
+      <div class="pitfall-box"><p class="sub">Pitfall</p><p>Draining without <code>--ignore-daemonsets</code> hangs forever since DaemonSet pods aren't meant to be evicted. Draining without checking PDBs can violate your own availability guarantees mid-incident.</p></div>
+      <div class="ticket-tags"><span class="tag violet">cluster-admin</span><span class="tag red">troubleshooting</span></div>
+    </div>
+  </div>
+
+  <div class="ticket" data-sev="2">
+    <div class="ticket-head"><span class="ticket-id">K8S-104</span><span class="sev-badge s2">SEV-2</span><span class="ticket-q">CPU usage is high but HPA never scales the deployment. Why?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <p class="sub">Diagnose</p>
+      <ul>
+        <li><code>kubectl describe hpa</code> — check the "current/target" metrics line; if it shows <code>&lt;unknown&gt;</code>, metrics-server isn't reporting.</li>
+        <li>Confirm the deployment has <code>resources.requests.cpu</code> set — HPA's percentage math is <em>usage ÷ request</em>, no request means no baseline.</li>
+        <li>Check <code>maxReplicas</code> hasn't already been hit, and that the node pool has room (Cluster Autoscaler may itself be the bottleneck).</li>
+      </ul>
+      <div class="resolution-box"><p class="sub">Resolution</p><p>Set explicit requests, confirm metrics-server/Prometheus adapter is healthy, and separate the two questions "did HPA decide to scale" (control plane) from "could the cluster fit the new pods" (capacity).</p></div>
+      <div class="ticket-tags"><span class="tag violet">autoscaling</span></div>
+    </div>
+  </div>
+
+  <div class="ticket" data-sev="2">
+    <div class="ticket-head"><span class="ticket-id">K8S-105</span><span class="sev-badge s2">SEV-2</span><span class="ticket-q">A pod is stuck in <code>Pending</code> with a PersistentVolumeClaim.</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <p class="sub">Diagnose</p>
+      <ul>
+        <li><code>kubectl describe pvc</code> and <code>kubectl describe pod</code> — Events usually say exactly why: no matching StorageClass, zone mismatch, or quota exceeded.</li>
+        <li>In AKS, a classic case: the PVC's disk was provisioned in zone-1 but the pod got scheduled to a node in zone-2 (zonal Azure Disks aren't portable across zones).</li>
+      </ul>
+      <div class="resolution-box"><p class="sub">Resolution</p><p>Use a StorageClass with <code>volumeBindingMode: WaitForFirstConsumer</code> so the disk is provisioned in the same zone the scheduler actually picks, instead of provisioning immediately and hoping.</p></div>
+      <div class="ticket-tags"><span class="tag violet">storage</span></div>
+    </div>
+  </div>
+
+  <div class="ticket" data-sev="1">
+    <div class="ticket-head"><span class="ticket-id">K8S-106</span><span class="sev-badge s1">SEV-1</span><span class="ticket-q">Traffic to a Service returns intermittent 502s through the ingress. Where do you look?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <p class="sub">Diagnose</p>
+      <ul>
+        <li>Confirm <code>kubectl get endpoints &lt;svc&gt;</code> lists healthy pod IPs — a Service with a correct selector but zero endpoints is invisible traffic-wise.</li>
+        <li>Check the readiness probe: a pod can be Running but not Ready, and Ready is what gates Service endpoint membership.</li>
+        <li>Check ingress controller logs for upstream connection resets — often a mismatch between the app's actual listening port and the Service's <code>targetPort</code>.</li>
+        <li>Intermittent (not constant) 502s during deploys usually mean pods are removed from the endpoint list <em>after</em> traffic stops routing, not before — a missing <code>preStop</code> hook / graceful shutdown gap.</li>
+      </ul>
+      <div class="resolution-box"><p class="sub">Resolution</p><p>Add a <code>preStop</code> sleep (or handle SIGTERM) so the pod keeps serving briefly while it's deregistered from the Service/ingress, and tune <code>terminationGracePeriodSeconds</code>. This is the single most common cause of "502s only during deploys."</p></div>
+      <div class="pitfall-box"><p class="sub">Pitfall</p><p>Blaming the ingress controller first. In practice it's almost always readiness/endpoint timing, not the controller itself.</p></div>
+      <div class="ticket-tags"><span class="tag blue">networking</span><span class="tag red">troubleshooting</span></div>
+    </div>
+  </div>
+
+  <div class="ticket" data-sev="2">
+    <div class="ticket-head"><span class="ticket-id">K8S-107</span><span class="sev-badge s2">SEV-2</span><span class="ticket-q">Two pods in different namespaces can't reach each other after a NetworkPolicy rollout.</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <p class="sub">Diagnose</p>
+      <ul>
+        <li>NetworkPolicies are <strong>additive and default-deny-once-selected</strong>: the moment any policy selects a pod, all traffic not explicitly allowed is denied.</li>
+        <li>Check both directions — ingress policy on the destination pod <em>and</em> egress policy on the source pod, both must allow the flow (if egress policies exist at all).</li>
+        <li>Cross-namespace traffic needs a <code>namespaceSelector</code> in the policy, not just a <code>podSelector</code>.</li>
+      </ul>
+      <div class="resolution-box"><p class="sub">Resolution</p><p>Add an explicit allow rule with both <code>podSelector</code> and <code>namespaceSelector</code> (with a namespace label) for the calling service, and verify with a temporary <code>kubectl run</code> debug pod plus <code>curl</code>/<code>nc</code> rather than guessing from YAML alone.</p></div>
+      <div class="ticket-tags"><span class="tag blue">networking</span><span class="tag red">security</span></div>
+    </div>
+  </div>
+
+  <div class="ticket" data-sev="2">
+    <div class="ticket-head"><span class="ticket-id">K8S-108</span><span class="sev-badge s2">SEV-2</span><span class="ticket-q">A CI service account gets <code>Forbidden: User cannot patch deployments</code>. Fix it the right way.</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <p class="sub">Diagnose</p>
+      <ul>
+        <li><code>kubectl auth can-i patch deployments --as=system:serviceaccount:ci:deployer -n prod</code> reproduces the exact check.</li>
+        <li>Inspect the bound Role/ClusterRole and RoleBinding — missing verb, wrong resource, or bound in the wrong namespace.</li>
+      </ul>
+      <div class="resolution-box"><p class="sub">Resolution</p><p>Grant least privilege with a namespaced <code>Role</code> + <code>RoleBinding</code> scoped to exactly the verbs needed (<code>get, list, patch</code> on <code>deployments</code>), not a blanket <code>ClusterRoleBinding</code> to <code>cluster-admin</code> just to unblock the pipeline.</p></div>
+      <div class="pitfall-box"><p class="sub">Pitfall</p><p>"Just give it cluster-admin" is the answer that fails you in a security-conscious interview. Always narrate the least-privilege alternative even under time pressure.</p></div>
+      <div class="ticket-tags"><span class="tag red">security</span><span class="tag blue">rbac</span></div>
+    </div>
+  </div>
+
+  <div class="ticket" data-sev="3">
+    <div class="ticket-head"><span class="ticket-id">K8S-109</span><span class="sev-badge s3">SEV-3</span><span class="ticket-q">A <code>helm upgrade</code> went out broken. How do you recover, and how could it have been caught earlier?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <p class="sub">Diagnose</p>
+      <ul>
+        <li><code>helm history &lt;release&gt;</code> to see revisions, <code>helm rollback &lt;release&gt; &lt;revision&gt;</code> to revert immediately.</li>
+        <li>Post-recovery: <code>helm diff upgrade</code> (plugin) or <code>--dry-run --debug</code> in CI before every real upgrade to preview the rendered manifest diff.</li>
+      </ul>
+      <div class="resolution-box"><p class="sub">Resolution</p><p>Roll back first, root-cause second — restoring service takes priority over understanding why in a live incident. Then add a CI gate: template-render + <code>kubeval</code>/<code>conftest</code> policy check + canary/staged rollout (Argo Rollouts or a manual weighted step) before full production.</p></div>
+      <div class="ticket-tags"><span class="tag violet">helm</span><span class="tag green">deployment</span></div>
+    </div>
+  </div>
+
+  <div class="ticket" data-sev="3">
+    <div class="ticket-head"><span class="ticket-id">K8S-110</span><span class="sev-badge s3">SEV-3</span><span class="ticket-q">How do you upgrade a production AKS cluster's Kubernetes version with zero downtime?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <p class="sub">Diagnose &amp; approach</p>
+      <ul>
+        <li>Upgrade control plane first (managed by Azure for AKS), then node pools — never skip more than one minor version at a time.</li>
+        <li>Use a <strong>surge upgrade</strong> setting (<code>maxSurge</code>) so AKS adds new nodes on the target version before draining old ones, instead of upgrading in place.</li>
+        <li>Confirm PodDisruptionBudgets exist for every critical workload so the drain respects minimum availability.</li>
+      </ul>
+      <div class="resolution-box"><p class="sub">Resolution</p><p>Blue/green the node pool: create a new node pool on the target version, cordon+drain the old one gradually, delete it once traffic has fully shifted. This avoids any in-place node reboot risk entirely and gives an instant rollback path (just stop draining).</p></div>
+      <div class="ticket-tags"><span class="tag violet">cluster-admin</span><span class="tag green">production</span></div>
+    </div>
+  </div>
+
+  <div class="ticket" data-sev="2">
+    <div class="ticket-head"><span class="ticket-id">K8S-111</span><span class="sev-badge s2">SEV-2</span><span class="ticket-q">When would you choose a StatefulSet over a Deployment, and what breaks if you get it wrong?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <p class="sub">Answer</p>
+      <ul>
+        <li><strong>Deployment</strong>: identical, interchangeable, stateless replicas — pod identity doesn't matter, any replica can serve any request.</li>
+        <li><strong>StatefulSet</strong>: stable network identity (<code>pod-0</code>, <code>pod-1</code>...), stable per-pod storage (PVC follows the pod on reschedule), ordered start/stop — needed for databases, Kafka, etcd-like systems.</li>
+      </ul>
+      <div class="pitfall-box"><p class="sub">Pitfall</p><p>Running a clustered database as a plain Deployment with a shared PVC: on rescheduling, two pods can mount (or fight over) the same volume, or lose their identity, corrupting cluster state. This is a favorite "why is this wrong" whiteboard question.</p></div>
+      <div class="ticket-tags"><span class="tag violet">workloads</span></div>
+    </div>
+  </div>
+
+  <div class="ticket" data-sev="2">
+    <div class="ticket-head"><span class="ticket-id">K8S-112</span><span class="sev-badge s2">SEV-2</span><span class="ticket-q">Nodes are running hot and you suspect noisy-neighbor pods. How do you confirm and contain it?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <p class="sub">Diagnose</p>
+      <ul>
+        <li><code>kubectl top pods --all-namespaces --sort-by=cpu</code> for a quick view; Grafana/Prometheus for historical confirmation.</li>
+        <li>Check whether offending pods have <code>limits</code> set at all — without limits a pod can consume all available node CPU/memory.</li>
+      </ul>
+      <div class="resolution-box"><p class="sub">Resolution</p><p>Enforce <code>ResourceQuota</code> at the namespace level and <code>LimitRange</code> for default requests/limits so no team can omit them; consider taints/tolerations or separate node pools to isolate genuinely bursty workloads from latency-sensitive ones.</p></div>
+      <div class="ticket-tags"><span class="tag violet">cluster-admin</span><span class="tag amber">capacity</span></div>
+    </div>
+  </div>
+
+  <div class="ticket" data-sev="1">
+    <div class="ticket-head"><span class="ticket-id">K8S-113</span><span class="sev-badge s1">SEV-1</span><span class="ticket-q">etcd is corrupted / the control plane is unresponsive. What's the recovery plan?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <p class="sub">Approach</p>
+      <ul>
+        <li>On managed AKS, the control plane (including etcd) is Azure-operated — your job is opening a support case and failing over workloads, not restoring etcd yourself.</li>
+        <li>For self-managed clusters: etcd should have scheduled snapshots (<code>etcdctl snapshot save</code>); restore replaces the data directory on each member and requires a coordinated cluster restart.</li>
+      </ul>
+      <div class="resolution-box"><p class="sub">Resolution</p><p>This question is really testing whether you know etcd <em>is</em> the cluster's single source of truth, so its backup cadence and restore drill needs to be tested regularly, not just configured and forgotten — and that on AKS this is Microsoft's responsibility under the shared responsibility model.</p></div>
+      <div class="ticket-tags"><span class="tag violet">cluster-admin</span><span class="tag red">disaster-recovery</span></div>
+    </div>
+  </div>
+
+  <div class="ticket" data-sev="3">
+    <div class="ticket-head"><span class="ticket-id">K8S-114</span><span class="sev-badge s3">SEV-3</span><span class="ticket-q">How do you secure a production cluster end to end — give me the layers.</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <p class="sub">Answer — layer by layer</p>
+      <ul>
+        <li><strong>Cluster access:</strong> Entra ID integration for <code>kubectl</code> auth, RBAC with least privilege, no shared static kubeconfigs.</li>
+        <li><strong>Workload identity:</strong> Azure AD Workload Identity / Managed Identity instead of embedding cloud credentials as Secrets.</li>
+        <li><strong>Network:</strong> default-deny NetworkPolicies, private cluster (no public API server endpoint) where possible.</li>
+        <li><strong>Supply chain:</strong> image scanning in CI, signed images, admission control (e.g. Gatekeeper/Kyverno) to block unscanned or non-compliant images.</li>
+        <li><strong>Runtime:</strong> Pod Security Admission (restricted profile), read-only root filesystem, non-root users, dropped Linux capabilities.</li>
+        <li><strong>Secrets:</strong> external secret store (Key Vault via CSI driver) instead of raw Kubernetes Secrets at rest.</li>
+      </ul>
+      <div class="ticket-tags"><span class="tag red">security</span><span class="tag green">production</span></div>
+    </div>
+  </div>
+
+</div>
+
+</main>
+<div class="shell">
+  <div class="module-nav">
+    <a href="index.html"><div class="lbl">&larr; Previous module</div><div class="ttl">Overview</div></a>
+    <a href="cicd-git.html" class="next"><div class="lbl">Next module &rarr;</div><div class="ttl">CI/CD & Git</div></a>
+    </div>
+</div>
+<footer class="site-footer">
+  Built for interview prep &middot; 10 modules &middot; scenario-first, visual-first &middot; <a href="scenarios.html">jump to the full scenario bank &rarr;</a>
+</footer>
+<script src="assets/main.js"></script>
+</body>
+</html>

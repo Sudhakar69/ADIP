@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Identity & Security · AZ-OPS Readiness Board</title>
+<meta name="description" content="Scenario-based interview prep for Senior Azure DevOps / Cloud Architect roles — Kubernetes, CI/CD, IaC, monitoring, incident response, DevSecOps and Azure architecture.">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="statusbar">
+      <span class="dot"></span><b>ALL SYSTEMS NOMINAL</b><span class="sep">|</span>
+      <span>module: <b>Identity & Security</b></span><span class="sep">|</span>
+      <span>env: <b>interview-prep</b></span><span class="sep">|</span>
+      <span>region: <b>study-local</b></span>
+      <span class="fill"></span>
+      <span data-live-clock>00:00:00 UTC</span>
+    </div>
+  <div class="header-inner">
+    <a class="brand" href="index.html">
+      <span class="mark">AZ</span>
+      <span>AZ-OPS Board<small>Senior Azure DevOps &middot; Interview Readiness</small></span>
+    </a>
+    <button class="nav-toggle" aria-label="Toggle navigation">MENU</button>
+    <nav class="main-nav">
+        <a href="index.html">Overview</a>
+        <a href="kubernetes.html">Kubernetes</a>
+        <a href="cicd-git.html">CI/CD & Git</a>
+        <a href="iac.html">IaC</a>
+        <a href="monitoring-incident.html">Monitoring & Incidents</a>
+        <a href="devsecops.html">DevSecOps</a>
+        <a href="azure-landing-zone.html">Landing Zone & DR</a>
+        <a href="azure-networking.html">Networking</a>
+        <a href="azure-identity-security.html" class="active">Identity & Security</a>
+        <a href="scenarios.html">Scenario Bank</a>
+    </nav>
+  </div>
+</header>
+<main>
+<div class="shell page-hero">
+  <div class="eyebrow"><span class="dot"></span> Module 08 · Cloud Architect track</div>
+  <h1>Identity &amp; security: the perimeter that actually matters</h1>
+  <p class="lede">"Implement Identity &amp; Access Management using Microsoft Entra ID, PIM, RBAC, Managed Identity, and MFA." In a cloud-native estate, identity <em>is</em> the network perimeter. Interviewers use this module to check whether you reach for standing privilege or just-in-time, and whether you know where each guardrail actually lives.</p>
+</div>
+
+<div class="shell section">
+  <div class="section-head"><div><h2>The identity &amp; guardrail stack</h2><p class="section-desc">Four layers, each answering a different question: who are you, what can you do, is it safe, and is it compliant.</p></div></div>
+  <div class="diagram-frame">
+    <svg viewBox="0 0 1180 420" xmlns="http://www.w3.org/2000/svg" font-family="JetBrains Mono, monospace">
+      <defs><marker id="ia1" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#5d7284"/></marker></defs>
+
+      <!-- User -->
+      <rect x="20" y="170" width="130" height="70" rx="8" fill="none" stroke="#6d7d8d" stroke-dasharray="4 3"/>
+      <text x="85" y="200" fill="#a9b6c4" font-size="10" text-anchor="middle">Engineer</text>
+      <text x="85" y="216" fill="#6d7d8d" font-size="8.5" text-anchor="middle">wants prod access</text>
+
+      <line x1="150" y1="205" x2="200" y2="205" stroke="#3fa9f5" stroke-width="2" marker-end="url(#ia1)"/>
+
+      <!-- Entra ID -->
+      <rect x="200" y="60" width="200" height="290" rx="10" fill="rgba(63,169,245,0.08)" stroke="#3fa9f5" stroke-width="1.5"/>
+      <text x="300" y="82" fill="#3fa9f5" font-size="10.5" text-anchor="middle">MICROSOFT ENTRA ID</text>
+
+      <rect x="220" y="96" width="160" height="40" rx="6" fill="#161f2a" stroke="#212c39"/>
+      <text x="300" y="113" fill="#e7edf3" font-size="8.5" text-anchor="middle">Authentication</text>
+      <text x="300" y="127" fill="#a9b6c4" font-size="7.5" text-anchor="middle">password + MFA (Authenticator)</text>
+
+      <rect x="220" y="144" width="160" height="46" rx="6" fill="#161f2a" stroke="#212c39"/>
+      <text x="300" y="161" fill="#e7edf3" font-size="8.5" text-anchor="middle">Conditional Access</text>
+      <text x="300" y="174" fill="#a9b6c4" font-size="7.5" text-anchor="middle">device compliant? risky sign-in?</text>
+      <text x="300" y="185" fill="#a9b6c4" font-size="7.5" text-anchor="middle">location / risk-based policy</text>
+
+      <rect x="220" y="198" width="160" height="46" rx="6" fill="#161f2a" stroke="#212c39"/>
+      <text x="300" y="215" fill="#e7edf3" font-size="8.5" text-anchor="middle">PIM</text>
+      <text x="300" y="228" fill="#a9b6c4" font-size="7.5" text-anchor="middle">eligible → activate → time-boxed</text>
+      <text x="300" y="239" fill="#a9b6c4" font-size="7.5" text-anchor="middle">approval + justification required</text>
+
+      <rect x="220" y="252" width="160" height="40" rx="6" fill="#161f2a" stroke="#212c39"/>
+      <text x="300" y="269" fill="#e7edf3" font-size="8.5" text-anchor="middle">RBAC assignment</text>
+      <text x="300" y="283" fill="#a9b6c4" font-size="7.5" text-anchor="middle">role scoped to a resource group</text>
+
+      <rect x="220" y="300" width="160" height="34" rx="6" fill="#161f2a" stroke="#212c39"/>
+      <text x="300" y="321" fill="#e7edf3" font-size="8.5" text-anchor="middle">Access token (short-lived)</text>
+
+      <line x1="400" y1="220" x2="450" y2="220" stroke="#5d7284" stroke-width="1.5" marker-end="url(#ia1)"/>
+
+      <!-- Azure Resource -->
+      <rect x="450" y="130" width="210" height="180" rx="10" fill="rgba(53,211,153,0.08)" stroke="#35d399" stroke-width="1.5"/>
+      <text x="555" y="152" fill="#35d399" font-size="10.5" text-anchor="middle">AZURE RESOURCE</text>
+      <text x="555" y="168" fill="#a9b6c4" font-size="8" text-anchor="middle">AKS / VM / App Service</text>
+
+      <rect x="470" y="184" width="170" height="38" rx="6" fill="#161f2a" stroke="#212c39"/>
+      <text x="555" y="200" fill="#e7edf3" font-size="8.5" text-anchor="middle">Managed Identity</text>
+      <text x="555" y="213" fill="#a9b6c4" font-size="7.5" text-anchor="middle">no secret in code/pipeline</text>
+
+      <rect x="470" y="230" width="170" height="38" rx="6" fill="#161f2a" stroke="#212c39"/>
+      <text x="555" y="246" fill="#e7edf3" font-size="8.5" text-anchor="middle">reaches Key Vault</text>
+      <text x="555" y="259" fill="#a9b6c4" font-size="7.5" text-anchor="middle">secrets / certs / keys</text>
+
+      <rect x="470" y="276" width="170" height="26" rx="6" fill="#161f2a" stroke="#212c39"/>
+      <text x="555" y="293" fill="#a9b6c4" font-size="7.5" text-anchor="middle">workload never sees a password</text>
+
+      <!-- Guardrails column -->
+      <rect x="720" y="60" width="220" height="120" rx="10" fill="rgba(240,85,90,0.08)" stroke="#f0555a" stroke-width="1.5"/>
+      <text x="830" y="82" fill="#f0555a" font-size="10.5" text-anchor="middle">MICROSOFT DEFENDER FOR CLOUD</text>
+      <text x="830" y="104" fill="#a9b6c4" font-size="8" text-anchor="middle">continuous posture assessment</text>
+      <text x="830" y="120" fill="#a9b6c4" font-size="8" text-anchor="middle">threat detection on running resources</text>
+      <text x="830" y="136" fill="#a9b6c4" font-size="8" text-anchor="middle">secure score + recommendations</text>
+      <text x="830" y="156" fill="#f0555a" font-size="7.5" text-anchor="middle">detective control — after deploy</text>
+
+      <rect x="720" y="200" width="220" height="120" rx="10" fill="rgba(245,166,35,0.08)" stroke="#f5a623" stroke-width="1.5"/>
+      <text x="830" y="222" fill="#f5a623" font-size="10.5" text-anchor="middle">AZURE POLICY</text>
+      <text x="830" y="244" fill="#a9b6c4" font-size="8" text-anchor="middle">deny / audit / DeployIfNotExists</text>
+      <text x="830" y="260" fill="#a9b6c4" font-size="8" text-anchor="middle">applied at management group scope</text>
+      <text x="830" y="276" fill="#a9b6c4" font-size="8" text-anchor="middle">e.g. "no public storage accounts"</text>
+      <text x="830" y="296" fill="#f5a623" font-size="7.5" text-anchor="middle">preventive control — before/at deploy</text>
+
+      <line x1="660" y1="200" x2="720" y2="150" stroke="#5d7284" stroke-width="1" stroke-dasharray="3 3"/>
+      <line x1="660" y1="230" x2="720" y2="260" stroke="#5d7284" stroke-width="1" stroke-dasharray="3 3"/>
+
+      <text x="480" y="400" fill="#6d7d8d" font-size="9" text-anchor="middle">Entra ID answers "who are you" · PIM answers "for how long" · RBAC answers "what can you touch" · Policy/Defender answer "is it still safe"</text>
+    </svg>
+    <div class="diagram-caption">// the flow an architect should narrate end-to-end: authenticate → conditional access check → PIM activation (time-boxed, justified) → scoped RBAC token → workload uses Managed Identity, never a static secret → Policy/Defender watch continuously.</div>
+  </div>
+</div>
+
+<div class="shell section">
+  <div class="section-head"><div><h2>RBAC vs. PIM vs. Azure Policy vs. Defender for Cloud</h2><p class="section-desc">The question that separates senior candidates: these four are commonly confused. Know which layer each one operates at.</p></div></div>
+  <div class="tbl-wrap">
+    <table class="cmp">
+      <tr><th></th><th>RBAC</th><th>PIM</th><th>Azure Policy</th><th>Defender for Cloud</th></tr>
+      <tr><td><strong>Answers</strong></td><td>What can this identity do?</td><td>For how long can it do it?</td><td>What is allowed to exist?</td><td>Is what exists currently safe?</td></tr>
+      <tr><td><strong>Nature</strong></td><td>Authorization</td><td>Time-bound elevation of RBAC</td><td>Preventive / compliance-as-code</td><td>Detective / posture &amp; threat</td></tr>
+      <tr><td><strong>Applies at</strong></td><td>Resource / RG / sub / MG scope</td><td>Entra roles + Azure RBAC roles</td><td>Management group / subscription</td><td>Subscription-wide, workload plans</td></tr>
+      <tr><td><strong>Typical use</strong></td><td>Grant Contributor on an RG</td><td>Eligible-for-Owner, activate 4h with approval</td><td>Deny public blob access; require tags</td><td>Alert on anomalous sign-in to a VM</td></tr>
+      <tr><td><strong>Standing risk if misused</strong></td><td>Permanent over-privilege</td><td>N/A — it's the fix for standing privilege</td><td>Resources drift out of compliance silently if not enforced (deny vs audit)</td><td>Alerts ignored / fatigue if not tuned</td></tr>
+    </table>
+  </div>
+  <div class="callout tip"><div class="ico">i</div><p><strong>Interview line that lands:</strong> "Nobody should have standing write access to production. RBAC defines the role; PIM makes holding that role temporary and justified; Policy stops non-compliant resources from ever landing; Defender watches what's already there." That one sentence answers most identity questions asked in architecture interviews.</p></div>
+</div>
+
+<div class="shell section">
+  <div class="section-head"><div><h2>Incident queue — Identity &amp; Security</h2></div></div>
+
+  <div class="ticket" data-sev="1">
+    <div class="ticket-head"><span class="ticket-id">SEC-801</span><span class="sev-badge s1">SEV-1</span><span class="ticket-q">A pipeline service principal has Owner on the whole subscription. Security flags it in an audit. How do you remediate without breaking the pipeline?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <ul>
+        <li>Inventory what the pipeline actually does — deploy to two resource groups, read from a storage account, write to a container registry.</li>
+        <li>Replace the broad Owner grant with scoped custom or built-in roles at the resource group level covering exactly those actions (e.g. Contributor on RG A/B, AcrPush on the registry).</li>
+        <li>Where possible, replace the service principal with a <strong>federated workload identity</strong> (OIDC trust between the CI system and Entra ID) so there's no long-lived client secret to leak at all.</li>
+      </ul>
+      <div class="resolution-box"><p class="sub">Resolution</p><p>Scope the role down to least privilege per resource, migrate the credential to workload identity federation, and add an Azure Policy that denies new role assignments of Owner at subscription scope going forward so this doesn't quietly recur.</p></div>
+      <div class="pitfall-box"><p class="sub">Pitfall</p><p>Removing Owner without first confirming every action the pipeline performs — you will find out what it needed the hard way, mid-incident, if you skip the inventory step.</p></div>
+      <div class="ticket-tags"><span class="tag violet">rbac</span><span class="tag red">security</span></div>
+    </div>
+  </div>
+
+  <div class="ticket" data-sev="2">
+    <div class="ticket-head"><span class="ticket-id">SEC-802</span><span class="sev-badge s2">SEV-2</span><span class="ticket-q">An application VM needs to read secrets from Key Vault. Walk through the secure way to wire that up.</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <p>Enable a <strong>system-assigned Managed Identity</strong> on the VM. Grant that identity an RBAC role (e.g. Key Vault Secrets User) scoped to just that vault — not the older access-policy model, which is being phased out in favor of RBAC for Key Vault. The application code calls the Key Vault SDK, which silently obtains a token via the instance metadata endpoint — no connection string, no secret, ever lands in app config or environment variables. Rotate underlying secrets in the vault itself; the app always reads current values, so a secret rotation needs no app redeploy.</p>
+      <div class="ticket-tags"><span class="tag blue">managed-identity</span><span class="tag violet">key-vault</span></div>
+    </div>
+  </div>
+
+  <div class="ticket" data-sev="2">
+    <div class="ticket-head"><span class="ticket-id">SEC-803</span><span class="sev-badge s2">SEV-2</span><span class="ticket-q">Explain PIM activation end to end for a scenario where an engineer needs 2 hours of Contributor access to fix a production issue at 11pm.</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <ul>
+        <li>Engineer is pre-assigned as <strong>eligible</strong> (not active) for the Contributor role on the target scope.</li>
+        <li>At 11pm they open PIM and request activation: supply a justification, optionally require MFA re-confirmation, and set a duration up to the policy's max (say, 4h).</li>
+        <li>If approval is configured, a designated approver is notified and must approve before the role becomes active; some orgs allow self-activation with just MFA + justification for genuine break-glass scenarios.</li>
+        <li>The role auto-expires at the end of the window — no manual revocation step to forget.</li>
+        <li>Every activation is logged with who, when, why, and for how long — that audit trail is the actual point.</li>
+      </ul>
+      <div class="callout tip"><div class="ico">i</div><p><strong>Interview line that lands:</strong> "PIM turns 'who has access' into 'who is currently using access, and why' — that's the difference auditors actually care about."</p></div>
+      <div class="ticket-tags"><span class="tag violet">pim</span><span class="tag amber">access</span></div>
+    </div>
+  </div>
+
+  <div class="ticket" data-sev="2">
+    <div class="ticket-head"><span class="ticket-id">SEC-804</span><span class="sev-badge s2">SEV-2</span><span class="ticket-q">Defender for Cloud shows a "Secure Score" that dropped 8 points overnight. How do you investigate and prioritize?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <p>Open the Recommendations blade filtered to "unhealthy" resources changed in the last 24h — new resources deployed without encryption, an NSG opened to 0.0.0.0/0, or an expired certificate are typical causes. Prioritize by the recommendation's actual risk weighting (not alphabetically) — Defender weights recommendations by exploitability and blast radius, so a public storage account with sensitive data outranks a missing tag every time. Fix the highest-weighted item first, then check whether it was a one-off manual change (points to needing Azure Policy to prevent recurrence) or came through IaC (points to a pipeline gate that should have caught it, e.g. a Checkov/tfsec scan).</p>
+      <div class="ticket-tags"><span class="tag red">defender</span><span class="tag amber">posture</span></div>
+    </div>
+  </div>
+
+  <div class="ticket" data-sev="3">
+    <div class="ticket-head"><span class="ticket-id">SEC-805</span><span class="sev-badge s3">SEV-3</span><span class="ticket-q">What's the difference between Azure RBAC and Entra ID roles (like Global Administrator)?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <p><strong>Entra ID roles</strong> control the directory itself — creating users, managing app registrations, resetting passwords, configuring Conditional Access. <strong>Azure RBAC</strong> controls access to Azure resources — VMs, storage, resource groups, subscriptions. A Global Administrator does not automatically have access to Azure resources; that's a deliberate separation. The trap: someone assumes Global Admin equals "full access to everything," including subscriptions — it doesn't, unless that admin explicitly elevates access to manage Azure resources, which is itself a logged, auditable action.</p>
+      <div class="ticket-tags"><span class="tag violet">fundamentals</span></div>
+    </div>
+  </div>
+
+  <div class="ticket" data-sev="2">
+    <div class="ticket-head"><span class="ticket-id">SEC-806</span><span class="sev-badge s2">SEV-2</span><span class="ticket-q">A secret was accidentally committed to a Git repo and merged to main. What's your response?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <ul>
+        <li><strong>Rotate first, clean up second</strong> — the secret is compromised the moment it's pushed, regardless of repo visibility; assume it's already been scraped. Rotate the credential in Key Vault / the source system immediately.</li>
+        <li>Purge it from Git history (filter-repo / BFG) — but understand this alone does not un-compromise it, it only stops future clones from carrying it.</li>
+        <li>Root-cause: why didn't a pre-commit or pipeline secrets-scanning gate (e.g. GitLab secret detection, gitleaks) catch this before merge — that gate is the actual preventive fix.</li>
+      </ul>
+      <div class="pitfall-box"><p class="sub">Pitfall</p><p>Spending the first 20 minutes scrubbing Git history while the live credential is still valid and exploitable. Rotation is always step one.</p></div>
+      <div class="ticket-tags"><span class="tag red">devsecops</span><span class="tag amber">incident</span></div>
+    </div>
+  </div>
+
+  <div class="ticket" data-sev="2">
+    <div class="ticket-head"><span class="ticket-id">SEC-807</span><span class="sev-badge s2">SEV-2</span><span class="ticket-q">Design Conditional Access for a workforce that includes contractors on unmanaged devices, without blocking legitimate business travel.</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <p>Use risk- and context-based policies rather than a blunt country block: require compliant/hybrid-joined device <em>or</em> MFA for full-time employees; for contractors on unmanaged devices, require MFA plus restrict to browser-based access with no download (via Conditional Access App Control / session controls) rather than a native client with full sync. Layer in Identity Protection's sign-in risk score so an atypical-location sign-in triggers step-up authentication instead of an outright block — this handles genuine travel without exempting risky sign-ins.</p>
+      <div class="ticket-tags"><span class="tag blue">entra-id</span><span class="tag violet">design</span></div>
+    </div>
+  </div>
+
+  <div class="ticket" data-sev="3">
+    <div class="ticket-head"><span class="ticket-id">SEC-808</span><span class="sev-badge s3">SEV-3</span><span class="ticket-q">When would you choose a user-assigned Managed Identity over a system-assigned one?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <p>System-assigned is tied 1:1 to the resource's lifecycle — created and destroyed with it, simplest for a single VM. User-assigned is a standalone identity you create once and attach to multiple resources (e.g. every node in a scale set, or a Function App and its paired Logic App that both need the same downstream permissions) — useful when identity needs to persist independent of any one resource being recreated, or when several resources should share exactly the same permission set for easier auditing.</p>
+      <div class="ticket-tags"><span class="tag blue">managed-identity</span></div>
+    </div>
+  </div>
+
+  <div class="ticket" data-sev="2">
+    <div class="ticket-head"><span class="ticket-id">SEC-809</span><span class="sev-badge s2">SEV-2</span><span class="ticket-q">Leadership asks for a way to guarantee every new subscription automatically gets baseline security controls without relying on engineers remembering to configure them. What do you build?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <p>Azure Policy initiatives (grouped policy sets) assigned at the <strong>management group</strong> level, not per-subscription — new subscriptions inherit the assignment automatically the moment they're placed under that management group. Use a mix of <code>Deny</code> (block non-compliant resources outright, e.g. public storage) and <code>DeployIfNotExists</code> (auto-remediate, e.g. attach diagnostic settings or enable Defender plans on anything that lands without them). This is the mechanism that makes a landing zone's guardrails self-enforcing instead of a checklist someone has to remember.</p>
+      <div class="ticket-tags"><span class="tag amber">policy</span><span class="tag violet">landing-zone</span></div>
+    </div>
+  </div>
+
+  <div class="ticket" data-sev="2">
+    <div class="ticket-head"><span class="ticket-id">SEC-810</span><span class="sev-badge s2">SEV-2</span><span class="ticket-q">A Key Vault holds secrets used by 30 applications. How do you avoid it becoming a single point of failure or a blast-radius risk?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <p>Don't use one vault for everything indiscriminately: segment vaults by sensitivity/environment/team (e.g. per application or per environment) so an over-broad RBAC grant or a compromised identity doesn't expose every secret in the estate — a single shared vault means one Key Vault Secrets User role handed out too widely equals blanket access. For availability, Key Vault is zone-redundant within a region by default on Premium/supported tiers; for DR, enable soft-delete and purge protection (mandatory for production) so accidental or malicious deletion is recoverable, and replicate critical secrets to a paired-region vault referenced by the DR runbook.</p>
+      <div class="ticket-tags"><span class="tag violet">key-vault</span><span class="tag blue">design</span></div>
+    </div>
+  </div>
+
+</div>
+
+</main>
+<div class="shell">
+  <div class="module-nav">
+    <a href="azure-networking.html"><div class="lbl">&larr; Previous module</div><div class="ttl">Networking</div></a>
+    <a href="scenarios.html" class="next"><div class="lbl">Next module &rarr;</div><div class="ttl">Scenario Bank</div></a>
+    </div>
+</div>
+<footer class="site-footer">
+  Built for interview prep &middot; 10 modules &middot; scenario-first, visual-first &middot; <a href="scenarios.html">jump to the full scenario bank &rarr;</a>
+</footer>
+<script src="assets/main.js"></script>
+</body>
+</html>

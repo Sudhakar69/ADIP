@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Overview · AZ-OPS Readiness Board</title>
+<meta name="description" content="Scenario-based interview prep for Senior Azure DevOps / Cloud Architect roles — Kubernetes, CI/CD, IaC, monitoring, incident response, DevSecOps and Azure architecture.">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="statusbar">
+      <span class="dot"></span><b>ALL SYSTEMS NOMINAL</b><span class="sep">|</span>
+      <span>module: <b>Overview</b></span><span class="sep">|</span>
+      <span>env: <b>interview-prep</b></span><span class="sep">|</span>
+      <span>region: <b>study-local</b></span>
+      <span class="fill"></span>
+      <span data-live-clock>00:00:00 UTC</span>
+    </div>
+  <div class="header-inner">
+    <a class="brand" href="index.html">
+      <span class="mark">AZ</span>
+      <span>AZ-OPS Board<small>Senior Azure DevOps &middot; Interview Readiness</small></span>
+    </a>
+    <button class="nav-toggle" aria-label="Toggle navigation">MENU</button>
+    <nav class="main-nav">
+        <a href="index.html" class="active">Overview</a>
+        <a href="kubernetes.html">Kubernetes</a>
+        <a href="cicd-git.html">CI/CD & Git</a>
+        <a href="iac.html">IaC</a>
+        <a href="monitoring-incident.html">Monitoring & Incidents</a>
+        <a href="devsecops.html">DevSecOps</a>
+        <a href="azure-landing-zone.html">Landing Zone & DR</a>
+        <a href="azure-networking.html">Networking</a>
+        <a href="azure-identity-security.html">Identity & Security</a>
+        <a href="scenarios.html">Scenario Bank</a>
+    </nav>
+  </div>
+</header>
+<main>
+<div class="shell page-hero">
+  <div class="eyebrow"><span class="dot"></span> Interview readiness board</div>
+  <h1>Senior Azure DevOps Engineer &amp; Cloud Architect — scenario prep</h1>
+  <p class="lede">This board is built the same way your interview will run: not "define Kubernetes," but "a pod is stuck in <code>CrashLoopBackOff</code> at 2am, walk me through it." Nine modules, each with an architecture diagram first, then a bank of real incident-style scenario questions with full resolutions and the traps interviewers set.</p>
+
+  <div class="stat-strip" style="margin-top:28px;">
+    <div class="stat"><div class="n">9</div><div class="l">Deep-dive modules</div></div>
+    <div class="stat"><div class="n">86</div><div class="l">Scenario tickets</div></div>
+    <div class="stat"><div class="n">25+</div><div class="l">Diagrams &amp; visual maps</div></div>
+    <div class="stat"><div class="n">2</div><div class="l">JDs merged — DevOps + Cloud Architect</div></div>
+  </div>
+</div>
+
+<div class="shell section">
+  <div class="section-head">
+    <div>
+      <h2>Modules</h2>
+      <p class="section-desc">Work top to bottom, or jump straight to your weak spot. Each module opens with a visual explainer, then narrows into scenario tickets you can click open like a real incident queue.</p>
+    </div>
+  </div>
+
+  <div class="grid grid-3">
+
+    <a class="topic-card" href="kubernetes.html" style="text-decoration:none;">
+      <div class="glow" style="background:var(--k8s);"></div>
+      <div class="row1"><div class="icn" style="background:rgba(139,123,240,0.15); color:var(--k8s);">K8S</div><span class="tag violet">Core</span></div>
+      <h3>Kubernetes</h3>
+      <p>Cluster admin, workloads, networking, ingress, HPA/VPA, Helm, security, production troubleshooting.</p>
+      <div class="meta"><span><b>14</b> tickets</span><span><b>5</b> diagrams</span></div>
+    </a>
+
+    <a class="topic-card" href="cicd-git.html" style="text-decoration:none;">
+      <div class="glow" style="background:var(--azure);"></div>
+      <div class="row1"><div class="icn" style="background:rgba(63,169,245,0.15); color:var(--azure);">CI</div><span class="tag blue">Core</span></div>
+      <h3>CI/CD &amp; Git</h3>
+      <p>GitLab CI/CD pipeline design, runners, branching strategy, release automation, rollback patterns.</p>
+      <div class="meta"><span><b>11</b> tickets</span><span><b>4</b> diagrams</span></div>
+    </a>
+
+    <a class="topic-card" href="iac.html" style="text-decoration:none;">
+      <div class="glow" style="background:var(--terraform);"></div>
+      <div class="row1"><div class="icn" style="background:rgba(123,91,224,0.15); color:var(--terraform);">IaC</div><span class="tag violet">Core</span></div>
+      <h3>Terraform &amp; Ansible</h3>
+      <p>State management, drift, modules, workspaces vs. environments, idempotency, Ansible vs. Terraform boundaries.</p>
+      <div class="meta"><span><b>10</b> tickets</span><span><b>3</b> diagrams</span></div>
+    </a>
+
+    <a class="topic-card" href="monitoring-incident.html" style="text-decoration:none;">
+      <div class="glow" style="background:var(--green);"></div>
+      <div class="row1"><div class="icn" style="background:rgba(53,211,153,0.15); color:var(--green);">OBS</div><span class="tag green">Core</span></div>
+      <h3>Monitoring &amp; Incident Response</h3>
+      <p>Prometheus/Grafana/ELK/Datadog, SLOs, alert design, on-call, RCA and blameless postmortems.</p>
+      <div class="meta"><span><b>12</b> tickets</span><span><b>4</b> diagrams</span></div>
+    </a>
+
+    <a class="topic-card" href="devsecops.html" style="text-decoration:none;">
+      <div class="glow" style="background:var(--red);"></div>
+      <div class="row1"><div class="icn" style="background:rgba(240,85,90,0.15); color:var(--red);">SEC</div><span class="tag red">Core</span></div>
+      <h3>DevSecOps</h3>
+      <p>Shift-left security, SAST/DAST, SCA, secrets scanning, image signing, policy-as-code gates.</p>
+      <div class="meta"><span><b>9</b> tickets</span><span><b>2</b> diagrams</span></div>
+    </a>
+
+    <a class="topic-card" href="azure-landing-zone.html" style="text-decoration:none;">
+      <div class="glow" style="background:var(--azure);"></div>
+      <div class="row1"><div class="icn" style="background:rgba(63,169,245,0.15); color:var(--azure);">LZ</div><span class="tag blue">Architect</span></div>
+      <h3>Landing Zone, Multi-Region &amp; DR</h3>
+      <p>Enterprise-scale landing zones, management groups, multi-subscription design, DR/BC, migration.</p>
+      <div class="meta"><span><b>10</b> tickets</span><span><b>3</b> diagrams</span></div>
+    </a>
+
+    <a class="topic-card" href="azure-networking.html" style="text-decoration:none;">
+      <div class="glow" style="background:var(--azure);"></div>
+      <div class="row1"><div class="icn" style="background:rgba(63,169,245,0.15); color:var(--azure);">NET</div><span class="tag blue">Architect</span></div>
+      <h3>Azure Networking</h3>
+      <p>Hub &amp; spoke, Virtual WAN, ExpressRoute, Application Gateway WAF, Private Link, firewalls.</p>
+      <div class="meta"><span><b>10</b> tickets</span><span><b>4</b> diagrams</span></div>
+    </a>
+
+    <a class="topic-card" href="azure-identity-security.html" style="text-decoration:none;">
+      <div class="glow" style="background:var(--k8s);"></div>
+      <div class="row1"><div class="icn" style="background:rgba(139,123,240,0.15); color:var(--k8s);">IAM</div><span class="tag violet">Architect</span></div>
+      <h3>Identity &amp; Security</h3>
+      <p>Entra ID, PIM, RBAC, Managed Identity, MFA, Defender for Cloud, Key Vault, Azure Policy.</p>
+      <div class="meta"><span><b>10</b> tickets</span><span><b>3</b> diagrams</span></div>
+    </a>
+
+    <a class="topic-card" href="scenarios.html" style="text-decoration:none;">
+      <div class="glow" style="background:var(--amber);"></div>
+      <div class="row1"><div class="icn" style="background:rgba(245,166,35,0.15); color:var(--amber);">ALL</div><span class="tag amber">Drill mode</span></div>
+      <h3>Full Scenario Bank</h3>
+      <p>Every ticket from every module in one filterable queue — for timed rapid-fire review before the interview.</p>
+      <div class="meta"><span><b>86</b> tickets</span><span>filter by topic</span></div>
+    </a>
+
+  </div>
+</div>
+
+<div class="shell section">
+  <div class="section-head"><div><h2>How the interview actually runs</h2>
+  <p class="section-desc">Real-life scenario interviews rarely ask "what is X." They hand you a broken system and watch how you reason. This board mirrors that shape everywhere.</p></div></div>
+
+  <div class="grid grid-4">
+    <div class="panel panel-pad">
+      <div class="panel-title">01 — the page</div>
+      <p class="text-dim" style="font-size:13.5px; margin:0;">You're told something is on fire: pods restarting, a pipeline failing, an ExpressRoute circuit down. That's your <strong>ticket header</strong> in this board.</p>
+    </div>
+    <div class="panel panel-pad">
+      <div class="panel-title">02 — triage</div>
+      <p class="text-dim" style="font-size:13.5px; margin:0;">You narrate the commands and dashboards you'd check first, in order. Every ticket's <strong>Diagnose</strong> section models this.</p>
+    </div>
+    <div class="panel panel-pad">
+      <div class="panel-title">03 — resolution</div>
+      <p class="text-dim" style="font-size:13.5px; margin:0;">You state the fix and why it's safe. The <strong>Resolution</strong> box is the answer an interviewer wants to hear.</p>
+    </div>
+    <div class="panel panel-pad">
+      <div class="panel-title">04 — prevent recurrence</div>
+      <p class="text-dim" style="font-size:13.5px; margin:0;">Senior candidates close with prevention: alerts, guardrails, IaC changes. The <strong>Pitfall</strong> box flags what juniors skip.</p>
+    </div>
+  </div>
+</div>
+
+</main>
+<div class="shell">
+  <div class="module-nav">
+    <div></div>
+    <a href="kubernetes.html" class="next"><div class="lbl">Next module &rarr;</div><div class="ttl">Kubernetes</div></a>
+    </div>
+</div>
+<footer class="site-footer">
+  Built for interview prep &middot; 10 modules &middot; scenario-first, visual-first &middot; <a href="scenarios.html">jump to the full scenario bank &rarr;</a>
+</footer>
+<script src="assets/main.js"></script>
+</body>
+</html>

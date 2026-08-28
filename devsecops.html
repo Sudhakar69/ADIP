@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DevSecOps · AZ-OPS Readiness Board</title>
+<meta name="description" content="Scenario-based interview prep for Senior Azure DevOps / Cloud Architect roles — Kubernetes, CI/CD, IaC, monitoring, incident response, DevSecOps and Azure architecture.">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="statusbar">
+      <span class="dot"></span><b>ALL SYSTEMS NOMINAL</b><span class="sep">|</span>
+      <span>module: <b>DevSecOps</b></span><span class="sep">|</span>
+      <span>env: <b>interview-prep</b></span><span class="sep">|</span>
+      <span>region: <b>study-local</b></span>
+      <span class="fill"></span>
+      <span data-live-clock>00:00:00 UTC</span>
+    </div>
+  <div class="header-inner">
+    <a class="brand" href="index.html">
+      <span class="mark">AZ</span>
+      <span>AZ-OPS Board<small>Senior Azure DevOps &middot; Interview Readiness</small></span>
+    </a>
+    <button class="nav-toggle" aria-label="Toggle navigation">MENU</button>
+    <nav class="main-nav">
+        <a href="index.html">Overview</a>
+        <a href="kubernetes.html">Kubernetes</a>
+        <a href="cicd-git.html">CI/CD & Git</a>
+        <a href="iac.html">IaC</a>
+        <a href="monitoring-incident.html">Monitoring & Incidents</a>
+        <a href="devsecops.html" class="active">DevSecOps</a>
+        <a href="azure-landing-zone.html">Landing Zone & DR</a>
+        <a href="azure-networking.html">Networking</a>
+        <a href="azure-identity-security.html">Identity & Security</a>
+        <a href="scenarios.html">Scenario Bank</a>
+    </nav>
+  </div>
+</header>
+<main>
+<div class="shell page-hero">
+  <div class="eyebrow"><span class="dot" style="background:var(--red); box-shadow:0 0 6px var(--red);"></span> Module 05</div>
+  <h1>DevSecOps: shifting security left</h1>
+  <p class="lede">"Drive DevSecOps best practices by integrating security checks, vulnerability scanning, and compliance into CI/CD pipelines." The interview wants to know exactly where each control sits in the pipeline and what it catches that the others don't.</p>
+</div>
+
+<div class="shell section">
+  <div class="section-head"><div><h2>Security gates across the pipeline</h2></div></div>
+  <div class="diagram-frame">
+    <svg viewBox="0 0 1180 220" xmlns="http://www.w3.org/2000/svg" font-family="JetBrains Mono, monospace">
+      <defs><marker id="a4" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#5d7284"/></marker></defs>
+      <line x1="30" y1="110" x2="1150" y2="110" stroke="#212c39" stroke-width="2"/>
+      <g font-size="9.5">
+        <circle cx="70" cy="110" r="6" fill="#3fa9f5"/>
+        <rect x="20" y="30" width="140" height="55" rx="7" fill="rgba(63,169,245,0.1)" stroke="#3fa9f5"/>
+        <text x="90" y="52" fill="#3fa9f5" text-anchor="middle">Pre-commit</text><text x="90" y="68" fill="#a9b6c4" font-size="8" text-anchor="middle">secret scan, lint</text>
+        <line x1="70" y1="104" x2="90" y2="85" stroke="#5d7284"/>
+
+        <circle cx="255" cy="110" r="6" fill="#8b7bf0"/>
+        <rect x="185" y="130" width="140" height="55" rx="7" fill="rgba(139,123,240,0.1)" stroke="#8b7bf0"/>
+        <text x="255" y="152" fill="#8b7bf0" text-anchor="middle">SAST</text><text x="255" y="168" fill="#a9b6c4" font-size="8" text-anchor="middle">static code analysis</text>
+        <line x1="255" y1="116" x2="255" y2="130" stroke="#5d7284"/>
+
+        <circle cx="440" cy="110" r="6" fill="#35d399"/>
+        <rect x="370" y="30" width="140" height="55" rx="7" fill="rgba(53,211,153,0.1)" stroke="#35d399"/>
+        <text x="440" y="52" fill="#35d399" text-anchor="middle">SCA</text><text x="440" y="68" fill="#a9b6c4" font-size="8" text-anchor="middle">dependency / license scan</text>
+        <line x1="440" y1="104" x2="440" y2="85" stroke="#5d7284"/>
+
+        <circle cx="625" cy="110" r="6" fill="#f5a623"/>
+        <rect x="555" y="130" width="140" height="55" rx="7" fill="rgba(245,166,35,0.1)" stroke="#f5a623"/>
+        <text x="625" y="152" fill="#f5a623" text-anchor="middle">Image scan</text><text x="625" y="168" fill="#a9b6c4" font-size="8" text-anchor="middle">CVEs in base + layers</text>
+        <line x1="625" y1="116" x2="625" y2="130" stroke="#5d7284"/>
+
+        <circle cx="810" cy="110" r="6" fill="#f0555a"/>
+        <rect x="740" y="30" width="140" height="55" rx="7" fill="rgba(240,85,90,0.1)" stroke="#f0555a"/>
+        <text x="810" y="52" fill="#f0555a" text-anchor="middle">DAST</text><text x="810" y="68" fill="#a9b6c4" font-size="8" text-anchor="middle">runtime attack simulation</text>
+        <line x1="810" y1="104" x2="810" y2="85" stroke="#5d7284"/>
+
+        <circle cx="995" cy="110" r="6" fill="#3fa9f5"/>
+        <rect x="925" y="130" width="140" height="55" rx="7" fill="rgba(63,169,245,0.1)" stroke="#3fa9f5"/>
+        <text x="995" y="152" fill="#3fa9f5" text-anchor="middle">Policy-as-code</text><text x="995" y="168" fill="#a9b6c4" font-size="8" text-anchor="middle">OPA/Gatekeeper admission</text>
+        <line x1="995" y1="116" x2="995" y2="130" stroke="#5d7284"/>
+      </g>
+      <text x="590" y="205" fill="#6d7d8d" font-size="9" text-anchor="middle">commit → build → test → scan → package → deploy → runtime</text>
+    </svg>
+    <div class="diagram-caption">// each control catches a different class of risk — know the difference, don't just say "we scan for vulnerabilities."</div>
+  </div>
+
+  <div class="tbl-wrap" style="margin-top:18px;">
+    <table class="cmp">
+      <tr><th>Control</th><th>Catches</th><th>Runs</th><th>Example tool</th></tr>
+      <tr><td><strong>SAST</strong></td><td>Insecure code patterns (injection, hardcoded secrets, unsafe deserialization) — without running the app</td><td>Every commit/MR</td><td>SonarQube, Semgrep, GitLab SAST</td></tr>
+      <tr><td><strong>SCA</strong></td><td>Known CVEs in open-source dependencies and license compliance issues</td><td>Every build</td><td>Snyk, Dependabot, GitLab Dependency Scanning</td></tr>
+      <tr><td><strong>Secret scanning</strong></td><td>Committed credentials, tokens, keys</td><td>Pre-commit + every push</td><td>gitleaks, TruffleHog, GitLab Secret Detection</td></tr>
+      <tr><td><strong>Container/image scan</strong></td><td>CVEs in the OS packages and layers of a built image</td><td>After build, before push</td><td>Trivy, Grype, ACR/Defender image scanning</td></tr>
+      <tr><td><strong>DAST</strong></td><td>Runtime vulnerabilities (auth bypass, XSS) by attacking a running instance</td><td>Against staging, pre-prod</td><td>OWASP ZAP, GitLab DAST</td></tr>
+      <tr><td><strong>Policy-as-code / admission control</strong></td><td>Non-compliant deploys (privileged containers, missing labels, disallowed registries)</td><td>At deploy time, in-cluster</td><td>OPA/Gatekeeper, Kyverno, Azure Policy</td></tr>
+    </table>
+  </div>
+</div>
+
+<div class="shell section">
+  <div class="section-head"><div><h2>Incident queue — DevSecOps</h2></div></div>
+
+  <div class="ticket" data-sev="1">
+    <div class="ticket-head"><span class="ticket-id">SEC-501</span><span class="sev-badge s1">SEV-1</span><span class="ticket-q">SCA finds a critical CVE in a transitive dependency used by 30 services. What's your rollout plan?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <ul>
+        <li>Confirm exploitability in your actual usage — not every CVE in a dependency is reachable code (a "reachability" check saves panic-fixing unaffected paths).</li>
+        <li>Prioritize by exposure: internet-facing services patch first, internal batch jobs later, on a defined timeline (e.g. critical = 24-48h).</li>
+        <li>Automate the bump via a shared base image or lockfile bot (Dependabot/Renovate) across all 30 repos instead of 30 manual PRs.</li>
+      </ul>
+      <div class="ticket-tags"><span class="tag red">vulnerability</span><span class="tag blue">pipeline</span></div>
+    </div>
+  </div>
+
+  <div class="ticket" data-sev="2">
+    <div class="ticket-head"><span class="ticket-id">SEC-502</span><span class="sev-badge s2">SEV-2</span><span class="ticket-q">Developers are complaining the security scan gate blocks every single build with low-severity findings. How do you fix the process without weakening security?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <p>Tune the gate to fail the build only on severity thresholds that matter (e.g. Critical/High block, Medium/Low report-only with a tracked backlog), and support suppression with an expiring, reviewed exception (not a silent ignore) for accepted-risk findings. A gate that blocks on everything trains developers to ignore it entirely — that's the real security failure.</p>
+      <div class="ticket-tags"><span class="tag red">pipeline</span><span class="tag green">process</span></div>
+    </div>
+  </div>
+
+  <div class="ticket" data-sev="1">
+    <div class="ticket-head"><span class="ticket-id">SEC-503</span><span class="sev-badge s1">SEV-1</span><span class="ticket-q">An engineer accidentally pushed AWS/Azure credentials to a public repo. Walk through your response.</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <ul>
+        <li><strong>Rotate/revoke the credential immediately</strong> — assume it's compromised the second it's public, regardless of how quickly it's deleted.</li>
+        <li>Check cloud provider activity logs for any usage from unfamiliar IPs during the exposure window.</li>
+        <li>Purge from Git history as cleanup (not the primary control), and add automated secret-scanning as a pre-receive/push gate so this can't reach the remote again.</li>
+      </ul>
+      <div class="ticket-tags"><span class="tag red">incident</span><span class="tag violet">secrets</span></div>
+    </div>
+  </div>
+
+  <div class="ticket" data-sev="2">
+    <div class="ticket-head"><span class="ticket-id">SEC-504</span><span class="sev-badge s2">SEV-2</span><span class="ticket-q">How do you prevent an unscanned or unsigned container image from ever reaching production, even if someone bypasses the pipeline?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <p>Pipeline gates alone are advisory — someone with cluster access can still <code>kubectl apply</code> directly. The durable control is <strong>admission control in-cluster</strong>: an OPA/Gatekeeper or Kyverno policy that rejects any pod spec referencing an image without a valid signature (cosign/Notary) or from an untrusted registry, enforced by the cluster itself, not just by CI.</p>
+      <div class="ticket-tags"><span class="tag red">supply-chain</span><span class="tag violet">kubernetes</span></div>
+    </div>
+  </div>
+
+  <div class="ticket" data-sev="3">
+    <div class="ticket-head"><span class="ticket-id">SEC-505</span><span class="sev-badge s3">SEV-3</span><span class="ticket-q">What's the difference between SAST and DAST, and why do you need both?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <p><strong>SAST</strong> reads source code without executing it — fast, catches issues early, but can't see runtime behavior (misconfigured auth middleware that only fails under real request flow) and has false positives from patterns that are actually safe in context. <strong>DAST</strong> attacks a running instance like a real attacker would — catches real exploitable issues (including config/deployment mistakes SAST can't see) but runs late (needs a deployed environment) and can't point to a line of code. Mature pipelines run both at different stages.</p>
+      <div class="ticket-tags"><span class="tag red">fundamentals</span></div>
+    </div>
+  </div>
+
+  <div class="ticket" data-sev="2">
+    <div class="ticket-head"><span class="ticket-id">SEC-506</span><span class="sev-badge s2">SEV-2</span><span class="ticket-q">Compliance asks for an audit trail of every production change for the last 12 months. Where does that live in your setup?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <p>Git history (who changed what code, reviewed by whom) + pipeline run logs (what was deployed, when, by which pipeline, approved by whom) + cloud activity logs (Azure Activity Log / Entra sign-in logs for who touched what resource directly) together form the trail. This is also the argument for "everything through pipelines, nothing manual" — manual portal changes are the audit gap.</p>
+      <div class="ticket-tags"><span class="tag red">compliance</span></div>
+    </div>
+  </div>
+
+  <div class="ticket" data-sev="2">
+    <div class="ticket-head"><span class="ticket-id">SEC-507</span><span class="sev-badge s2">SEV-2</span><span class="ticket-q">How do you scan Infrastructure-as-Code itself for security misconfigurations before it's ever applied?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <p>Static IaC scanners (<code>tfsec</code>, <code>checkov</code>, Terrascan) run against the plan/HCL in CI — catching things like public storage buckets, open NSG rules (0.0.0.0/0), missing encryption-at-rest, or overly broad IAM roles before <code>apply</code> ever runs. Pair with a policy-as-code gate (Sentinel/OPA on the plan JSON) to hard-block specific violations rather than just warn.</p>
+      <div class="ticket-tags"><span class="tag violet">iac</span><span class="tag red">pipeline</span></div>
+    </div>
+  </div>
+
+  <div class="ticket" data-sev="3">
+    <div class="ticket-head"><span class="ticket-id">SEC-508</span><span class="sev-badge s3">SEV-3</span><span class="ticket-q">Explain the "shift-left" concept to someone skeptical it's worth the friction.</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <p>Cost of fixing a vulnerability rises the later it's found — a bad pattern caught by SAST at commit time is a one-line fix by the author who just wrote it; the same issue found in production is an incident, a hotfix, possibly a breach disclosure. Shift-left isn't about adding gates for their own sake, it's about moving the same checks to the cheapest point to fix them — and pairing that with fast, low-friction tooling so it doesn't become a bottleneck itself.</p>
+      <div class="ticket-tags"><span class="tag green">strategy</span></div>
+    </div>
+  </div>
+
+  <div class="ticket" data-sev="2">
+    <div class="ticket-head"><span class="ticket-id">SEC-509</span><span class="sev-badge s2">SEV-2</span><span class="ticket-q">A pentest finds a service account with far more permissions than it uses. How would your pipeline have caught this earlier?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <p>Least-privilege drift like this is best caught by periodic automated IAM access reviews (who/what has access vs. what it actually calls, using cloud-native tools like Azure Defender for Cloud's permission recommendations or AWS IAM Access Analyzer) rather than pipeline scanning alone — this is a config/identity governance gap, and the fix is scoped roles defined and reviewed as code (Terraform-managed role assignments) so grants are visible and diffable in PRs, not created ad hoc in the portal.</p>
+      <div class="ticket-tags"><span class="tag red">iam</span><span class="tag violet">governance</span></div>
+    </div>
+  </div>
+
+</div>
+
+</main>
+<div class="shell">
+  <div class="module-nav">
+    <a href="monitoring-incident.html"><div class="lbl">&larr; Previous module</div><div class="ttl">Monitoring & Incidents</div></a>
+    <a href="azure-landing-zone.html" class="next"><div class="lbl">Next module &rarr;</div><div class="ttl">Landing Zone & DR</div></a>
+    </div>
+</div>
+<footer class="site-footer">
+  Built for interview prep &middot; 10 modules &middot; scenario-first, visual-first &middot; <a href="scenarios.html">jump to the full scenario bank &rarr;</a>
+</footer>
+<script src="assets/main.js"></script>
+</body>
+</html>

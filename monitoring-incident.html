@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Monitoring, Observability & Incident Response · AZ-OPS Readiness Board</title>
+<meta name="description" content="Scenario-based interview prep for Senior Azure DevOps / Cloud Architect roles — Kubernetes, CI/CD, IaC, monitoring, incident response, DevSecOps and Azure architecture.">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="statusbar">
+      <span class="dot"></span><b>ALL SYSTEMS NOMINAL</b><span class="sep">|</span>
+      <span>module: <b>Monitoring & Incidents</b></span><span class="sep">|</span>
+      <span>env: <b>interview-prep</b></span><span class="sep">|</span>
+      <span>region: <b>study-local</b></span>
+      <span class="fill"></span>
+      <span data-live-clock>00:00:00 UTC</span>
+    </div>
+  <div class="header-inner">
+    <a class="brand" href="index.html">
+      <span class="mark">AZ</span>
+      <span>AZ-OPS Board<small>Senior Azure DevOps &middot; Interview Readiness</small></span>
+    </a>
+    <button class="nav-toggle" aria-label="Toggle navigation">MENU</button>
+    <nav class="main-nav">
+        <a href="index.html">Overview</a>
+        <a href="kubernetes.html">Kubernetes</a>
+        <a href="cicd-git.html">CI/CD & Git</a>
+        <a href="iac.html">IaC</a>
+        <a href="monitoring-incident.html" class="active">Monitoring & Incidents</a>
+        <a href="devsecops.html">DevSecOps</a>
+        <a href="azure-landing-zone.html">Landing Zone & DR</a>
+        <a href="azure-networking.html">Networking</a>
+        <a href="azure-identity-security.html">Identity & Security</a>
+        <a href="scenarios.html">Scenario Bank</a>
+    </nav>
+  </div>
+</header>
+<main>
+<div class="shell page-hero">
+  <div class="eyebrow"><span class="dot" style="background:var(--green); box-shadow:0 0 6px var(--green);"></span> Module 04</div>
+  <h1>Monitoring, observability &amp; incident response</h1>
+  <p class="lede">"Build robust monitoring, logging, and observability... lead incident response, RCA, and post-incident reviews." This module covers the stack, then the human process around an outage — both get tested.</p>
+</div>
+
+<div class="shell section">
+  <div class="section-head"><div><h2>The three pillars, and where each tool sits</h2></div></div>
+  <div class="diagram-frame">
+    <svg viewBox="0 0 1180 260" xmlns="http://www.w3.org/2000/svg" font-family="JetBrains Mono, monospace">
+      <!-- metrics -->
+      <rect x="20" y="20" width="360" height="220" rx="10" fill="rgba(53,211,153,0.06)" stroke="#35d399"/>
+      <text x="200" y="44" fill="#35d399" font-size="12" text-anchor="middle">METRICS</text>
+      <text x="200" y="62" fill="#a9b6c4" font-size="9" text-anchor="middle">numeric time-series — "how much / how fast"</text>
+      <rect x="45" y="80" width="140" height="46" rx="6" fill="#161f2a" stroke="#212c39"/><text x="115" y="100" fill="#e7edf3" font-size="9.5" text-anchor="middle">Prometheus</text><text x="115" y="114" fill="#6d7d8d" font-size="8" text-anchor="middle">scrape + PromQL</text>
+      <rect x="200" y="80" width="150" height="46" rx="6" fill="#161f2a" stroke="#212c39"/><text x="275" y="100" fill="#e7edf3" font-size="9.5" text-anchor="middle">Grafana</text><text x="275" y="114" fill="#6d7d8d" font-size="8" text-anchor="middle">dashboards + alerting</text>
+      <rect x="45" y="136" width="305" height="46" rx="6" fill="#161f2a" stroke="#212c39"/><text x="197" y="156" fill="#e7edf3" font-size="9.5" text-anchor="middle">Datadog / Azure Monitor metrics</text><text x="197" y="170" fill="#6d7d8d" font-size="8" text-anchor="middle">managed alternative, cross-cloud</text>
+      <text x="200" y="210" fill="#a9b6c4" font-size="8.5" text-anchor="middle">CPU, latency p95, error rate,</text>
+      <text x="200" y="224" fill="#a9b6c4" font-size="8.5" text-anchor="middle">queue depth, saturation</text>
+
+      <!-- logs -->
+      <rect x="410" y="20" width="360" height="220" rx="10" fill="rgba(63,169,245,0.06)" stroke="#3fa9f5"/>
+      <text x="590" y="44" fill="#3fa9f5" font-size="12" text-anchor="middle">LOGS</text>
+      <text x="590" y="62" fill="#a9b6c4" font-size="9" text-anchor="middle">discrete events — "what exactly happened"</text>
+      <rect x="435" y="80" width="140" height="46" rx="6" fill="#161f2a" stroke="#212c39"/><text x="505" y="100" fill="#e7edf3" font-size="9.5" text-anchor="middle">ELK / EFK</text><text x="505" y="114" fill="#6d7d8d" font-size="8" text-anchor="middle">Elasticsearch+Kibana</text>
+      <rect x="590" y="80" width="150" height="46" rx="6" fill="#161f2a" stroke="#212c39"/><text x="665" y="100" fill="#e7edf3" font-size="9.5" text-anchor="middle">Splunk</text><text x="665" y="114" fill="#6d7d8d" font-size="8" text-anchor="middle">enterprise SIEM/logs</text>
+      <rect x="435" y="136" width="305" height="46" rx="6" fill="#161f2a" stroke="#212c39"/><text x="587" y="156" fill="#e7edf3" font-size="9.5" text-anchor="middle">Fluentd / Fluent Bit / Filebeat</text><text x="587" y="170" fill="#6d7d8d" font-size="8" text-anchor="middle">shipping agents (DaemonSet on K8s)</text>
+      <text x="590" y="210" fill="#a9b6c4" font-size="8.5" text-anchor="middle">stack traces, structured JSON logs,</text>
+      <text x="590" y="224" fill="#a9b6c4" font-size="8.5" text-anchor="middle">audit trails</text>
+
+      <!-- traces -->
+      <rect x="800" y="20" width="360" height="220" rx="10" fill="rgba(139,123,240,0.06)" stroke="#8b7bf0"/>
+      <text x="980" y="44" fill="#8b7bf0" font-size="12" text-anchor="middle">TRACES</text>
+      <text x="980" y="62" fill="#a9b6c4" font-size="9" text-anchor="middle">request path — "where did the time go"</text>
+      <rect x="825" y="80" width="140" height="46" rx="6" fill="#161f2a" stroke="#212c39"/><text x="895" y="100" fill="#e7edf3" font-size="9.5" text-anchor="middle">OpenTelemetry</text><text x="895" y="114" fill="#6d7d8d" font-size="8" text-anchor="middle">vendor-neutral SDK</text>
+      <rect x="980" y="80" width="150" height="46" rx="6" fill="#161f2a" stroke="#212c39"/><text x="1055" y="100" fill="#e7edf3" font-size="9.5" text-anchor="middle">Jaeger / App Insights</text><text x="1055" y="114" fill="#6d7d8d" font-size="8" text-anchor="middle">trace storage + UI</text>
+      <text x="980" y="160" fill="#a9b6c4" font-size="8.5" text-anchor="middle">span waterfalls across</text>
+      <text x="980" y="174" fill="#a9b6c4" font-size="8.5" text-anchor="middle">microservice hops</text>
+      <text x="980" y="210" fill="#a9b6c4" font-size="8.5" text-anchor="middle">answers "which downstream</text>
+      <text x="980" y="224" fill="#a9b6c4" font-size="8.5" text-anchor="middle">call caused the slow request"</text>
+    </svg>
+    <div class="diagram-caption">// interview shorthand: metrics tell you something's wrong, logs tell you what, traces tell you where in a distributed call chain.</div>
+  </div>
+</div>
+
+<div class="shell section">
+  <div class="section-head"><div><h2>Incident lifecycle</h2><p class="section-desc">The process a senior engineer is expected to lead, end to end.</p></div></div>
+  <div class="diagram-frame">
+    <svg viewBox="0 0 1180 150" xmlns="http://www.w3.org/2000/svg" font-family="JetBrains Mono, monospace">
+      <defs><marker id="a3" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#5d7284"/></marker></defs>
+      <g font-size="9.5">
+        <rect x="10" y="45" width="150" height="60" rx="8" fill="rgba(240,85,90,0.1)" stroke="#f0555a"/><text x="85" y="70" fill="#f0555a" text-anchor="middle">Alert fires</text><text x="85" y="86" fill="#a9b6c4" font-size="8" text-anchor="middle">SLO burn / threshold</text>
+        <line x1="160" y1="75" x2="195" y2="75" stroke="#5d7284" marker-end="url(#a3)"/>
+        <rect x="195" y="45" width="150" height="60" rx="8" fill="rgba(245,166,35,0.1)" stroke="#f5a623"/><text x="270" y="70" fill="#f5a623" text-anchor="middle">Triage &amp; declare</text><text x="270" y="86" fill="#a9b6c4" font-size="8" text-anchor="middle">assign severity, IC</text>
+        <line x1="345" y1="75" x2="380" y2="75" stroke="#5d7284" marker-end="url(#a3)"/>
+        <rect x="380" y="45" width="150" height="60" rx="8" fill="rgba(63,169,245,0.1)" stroke="#3fa9f5"/><text x="455" y="70" fill="#3fa9f5" text-anchor="middle">Mitigate</text><text x="455" y="86" fill="#a9b6c4" font-size="8" text-anchor="middle">stop the bleeding first</text>
+        <line x1="530" y1="75" x2="565" y2="75" stroke="#5d7284" marker-end="url(#a3)"/>
+        <rect x="565" y="45" width="150" height="60" rx="8" fill="rgba(53,211,153,0.1)" stroke="#35d399"/><text x="640" y="70" fill="#35d399" text-anchor="middle">Resolve</text><text x="640" y="86" fill="#a9b6c4" font-size="8" text-anchor="middle">confirm signal is green</text>
+        <line x1="715" y1="75" x2="750" y2="75" stroke="#5d7284" marker-end="url(#a3)"/>
+        <rect x="750" y="45" width="150" height="60" rx="8" fill="rgba(139,123,240,0.1)" stroke="#8b7bf0"/><text x="825" y="70" fill="#8b7bf0" text-anchor="middle">RCA</text><text x="825" y="86" fill="#a9b6c4" font-size="8" text-anchor="middle">5 Whys, timeline</text>
+        <line x1="900" y1="75" x2="935" y2="75" stroke="#5d7284" marker-end="url(#a3)"/>
+        <rect x="935" y="45" width="235" height="60" rx="8" fill="rgba(245,166,35,0.1)" stroke="#f5a623"/><text x="1052" y="70" fill="#f5a623" text-anchor="middle">Blameless postmortem</text><text x="1052" y="86" fill="#a9b6c4" font-size="8" text-anchor="middle">action items tracked to done</text>
+      </g>
+    </svg>
+    <div class="diagram-caption">// mitigate before you fully understand — restoring service and finding root cause are sequential, not the same step.</div>
+  </div>
+</div>
+
+<div class="shell section">
+  <div class="section-head"><div><h2>Incident queue — Monitoring &amp; Response</h2></div></div>
+
+  <div class="ticket" data-sev="1">
+    <div class="ticket-head"><span class="ticket-id">MON-401</span><span class="sev-badge s1">SEV-1</span><span class="ticket-q">Production is down. You get paged. What are your first five minutes?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <ul>
+        <li>Acknowledge the page (stop it re-escalating) and open the relevant dashboard — don't start guessing from memory.</li>
+        <li>Confirm blast radius: one region, all regions, one service, or a shared dependency (DNS, auth, database)?</li>
+        <li>Declare an incident with a severity and, if the org has one, an incident commander role — communication starts now, not after you've found root cause.</li>
+        <li>Look for what changed recently: deploys, config, feature flags, infra changes in the last few hours — most incidents trace back to a recent change.</li>
+      </ul>
+      <div class="resolution-box"><p class="sub">Resolution</p><p>Mitigate first: rollback, feature-flag off, or scale up/failover — restore service before you fully understand why. Root cause analysis happens after the fire is out.</p></div>
+      <div class="ticket-tags"><span class="tag red">incident</span><span class="tag green">process</span></div>
+    </div>
+  </div>
+
+  <div class="ticket" data-sev="2">
+    <div class="ticket-head"><span class="ticket-id">MON-402</span><span class="sev-badge s2">SEV-2</span><span class="ticket-q">Your team is getting paged 40 times a week and burning out. How do you fix alerting, not just tolerance for pages?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <ul>
+        <li>Audit every alert: does it map to actual user-facing impact (SLO burn rate), or is it a raw resource threshold (CPU &gt; 80%) that's frequently noisy and not actionable?</li>
+        <li>Convert "page-worthy" to symptom-based alerts (error rate, latency, availability) and demote cause-based signals (disk 70% full) to tickets/dashboards, not pages.</li>
+        <li>Add alert grouping/deduplication and sensible for-durations so one blip doesn't fire five pages.</li>
+      </ul>
+      <div class="resolution-box"><p class="sub">Resolution</p><p>Every alert should be actionable and tied to user impact. If an alert fires and the response is "nothing to do," it shouldn't be a page.</p></div>
+      <div class="ticket-tags"><span class="tag green">observability</span><span class="tag amber">on-call</span></div>
+    </div>
+  </div>
+
+  <div class="ticket" data-sev="3">
+    <div class="ticket-head"><span class="ticket-id">MON-403</span><span class="sev-badge s3">SEV-3</span><span class="ticket-q">Define SLI, SLO, and error budget, and how they change your deploy decisions.</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <ul>
+        <li><strong>SLI</strong> (indicator): a measured metric, e.g. "% of requests under 300ms."</li>
+        <li><strong>SLO</strong> (objective): a target for that SLI, e.g. "99.9% of requests under 300ms over 30 days."</li>
+        <li><strong>Error budget</strong>: the allowed 0.1% — once it's spent, the team's priority shifts from shipping features to reliability work, and risky deploys get paused or gated behind extra review.</li>
+      </ul>
+      <div class="ticket-tags"><span class="tag green">observability</span></div>
+    </div>
+  </div>
+
+  <div class="ticket" data-sev="1">
+    <div class="ticket-head"><span class="ticket-id">MON-404</span><span class="sev-badge s1">SEV-1</span><span class="ticket-q">Prometheus itself is down / not scraping — you're flying blind during an incident. What do you do?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <p>Fall back to secondary signals: cloud provider platform metrics (Azure Monitor), application logs directly, or a synthetic uptime check that's independent of your primary stack. This is also the argument for why monitoring infrastructure itself needs redundancy/HA and shouldn't share a failure domain with what it's monitoring — e.g. don't run your only Prometheus inside the same cluster it's the sole observer of, without a secondary path.</p>
+      <div class="ticket-tags"><span class="tag red">incident</span><span class="tag green">observability</span></div>
+    </div>
+  </div>
+
+  <div class="ticket" data-sev="2">
+    <div class="ticket-head"><span class="ticket-id">MON-405</span><span class="sev-badge s2">SEV-2</span><span class="ticket-q">Walk me through writing a blameless postmortem after a major outage.</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <ul>
+        <li><strong>Timeline</strong> of objective facts: when it started, when detected, when mitigated, when resolved — timestamps, not opinions.</li>
+        <li><strong>Impact</strong>: quantify it (users affected, revenue, SLO burn) rather than "it was bad."</li>
+        <li><strong>Root cause</strong> via 5 Whys, focused on systems and process gaps, never on naming/blaming an individual.</li>
+        <li><strong>Action items</strong>: specific, owned, dated, and tracked to closure — a postmortem with no completed action items is theater.</li>
+      </ul>
+      <div class="callout tip"><div class="ico">i</div><p><strong>Language matters:</strong> "the deploy process allowed an unvalidated config to reach prod," not "Dave pushed bad config." Interviewers listen for this framing specifically.</p></div>
+      <div class="ticket-tags"><span class="tag amber">rca</span><span class="tag green">process</span></div>
+    </div>
+  </div>
+
+  <div class="ticket" data-sev="2">
+    <div class="ticket-head"><span class="ticket-id">MON-406</span><span class="sev-badge s2">SEV-2</span><span class="ticket-q">Disk usage on a node is climbing steadily and will hit 100% in 6 hours. How do you handle it — page now or wait?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <p>This is a textbook case for a <strong>warning-level</strong> alert with a longer response window, not a page — it's predictable and not yet impacting users. Route it to a ticket/Slack channel with a clear runbook (log rotation, old artifact cleanup, or scale storage), and only escalate to a page if the trend accelerates or crosses a near-term threshold (e.g. &lt;1 hour to full).</p>
+      <div class="ticket-tags"><span class="tag green">alerting</span></div>
+    </div>
+  </div>
+
+  <div class="ticket" data-sev="3">
+    <div class="ticket-head"><span class="ticket-id">MON-407</span><span class="sev-badge s3">SEV-3</span><span class="ticket-q">Compare Prometheus+Grafana vs. Datadog vs. ELK for a mid-size platform team. How would you choose?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <div class="tbl-wrap"><table class="cmp">
+        <tr><th>Stack</th><th>Model</th><th>Strength</th><th>Trade-off</th></tr>
+        <tr><td>Prometheus + Grafana</td><td>Self-hosted, pull-based metrics</td><td>Free, huge ecosystem, K8s-native</td><td>You own scaling/HA/storage retention</td></tr>
+        <tr><td>Datadog</td><td>Managed SaaS, agent-based</td><td>Fast setup, unified metrics/logs/traces/APM</td><td>Cost scales fast with hosts/custom metrics</td></tr>
+        <tr><td>ELK / EFK</td><td>Self-hosted or Elastic Cloud, log-centric</td><td>Best-in-class full-text log search</td><td>Not built primarily for metrics/alerting; resource-hungry at scale</td></tr>
+      </table></div>
+      <p>Answer with a decision driver, not just a table: budget and headcount to operate infra → lean Datadog; K8s-heavy with cost sensitivity and in-house platform skill → Prometheus/Grafana; log-search-heavy compliance or security use case → ELK, often alongside the metrics stack rather than instead of it.</p>
+      <div class="ticket-tags"><span class="tag green">observability</span></div>
+    </div>
+  </div>
+
+  <div class="ticket" data-sev="2">
+    <div class="ticket-head"><span class="ticket-id">MON-408</span><span class="sev-badge s2">SEV-2</span><span class="ticket-q">Latency degraded slowly over two weeks, no single deploy caused it, and nobody noticed until customers complained. What failed?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <p>The alerting was threshold-based on a moving baseline that crept along with the degradation ("boiling frog" problem), or there was no SLO-based burn-rate alert at all — only "is it fully down" checks. Fix: alert on rate of change and on absolute SLO thresholds together, and review trend dashboards on a regular cadence, not only reactively.</p>
+      <div class="ticket-tags"><span class="tag green">observability</span><span class="tag amber">performance</span></div>
+    </div>
+  </div>
+
+  <div class="ticket" data-sev="1">
+    <div class="ticket-head"><span class="ticket-id">MON-409</span><span class="sev-badge s1">SEV-1</span><span class="ticket-q">During an active outage, three engineers are independently trying different fixes and stepping on each other. What's wrong with the response and how do you fix it live?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <p>Missing incident command structure. Assign a single <strong>Incident Commander</strong> who coordinates and makes the final call on which mitigation to try (and in what order), a dedicated communications channel/thread for status updates, and route all changes through the IC so actions aren't taken in parallel without visibility. This is a process question as much as a technical one — seniority shows in recognizing coordination failure as the actual root cause.</p>
+      <div class="ticket-tags"><span class="tag red">incident</span><span class="tag green">process</span></div>
+    </div>
+  </div>
+
+  <div class="ticket" data-sev="2">
+    <div class="ticket-head"><span class="ticket-id">MON-410</span><span class="sev-badge s2">SEV-2</span><span class="ticket-q">How do you monitor a Kubernetes cluster itself, separate from the applications running on it?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <ul>
+        <li><strong>kube-state-metrics</strong> for object-level state (deployment replica mismatches, pod phase counts, PVC status).</li>
+        <li><strong>node-exporter</strong> (DaemonSet) for host-level CPU/mem/disk/network per node.</li>
+        <li><strong>cAdvisor</strong> (built into kubelet) for per-container resource usage.</li>
+        <li>Control-plane metrics (API server latency, etcd health) — critical on self-managed clusters, mostly abstracted away on AKS.</li>
+      </ul>
+      <div class="ticket-tags"><span class="tag violet">kubernetes</span><span class="tag green">observability</span></div>
+    </div>
+  </div>
+
+  <div class="ticket" data-sev="2">
+    <div class="ticket-head"><span class="ticket-id">MON-411</span><span class="sev-badge s2">SEV-2</span><span class="ticket-q">Logs from 40 microservices are unsearchable — everyone greps individual pod logs. What's your fix?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <p>Centralize: ship every container's stdout/stderr via a DaemonSet log agent (Fluent Bit) to a central store (ELK or Log Analytics), enforce <strong>structured JSON logging</strong> with a correlation/trace ID on every log line, so a single request can be followed across services with one query instead of forty separate <code>kubectl logs</code> commands.</p>
+      <div class="ticket-tags"><span class="tag green">observability</span><span class="tag violet">kubernetes</span></div>
+    </div>
+  </div>
+
+  <div class="ticket" data-sev="3">
+    <div class="ticket-head"><span class="ticket-id">MON-412</span><span class="sev-badge s3">SEV-3</span><span class="ticket-q">How do you balance "move fast" with "keep things reliable" — the JD literally asks for this balance.</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <p>Error budgets are the concrete mechanism: as long as the budget isn't exhausted, teams ship freely; once it is, velocity yields to reliability work automatically, by policy rather than by argument. Pair that with progressive delivery (canary/feature flags) so "moving fast" doesn't mean "betting the whole fleet on every change" — blast radius is controlled independently of release frequency.</p>
+      <div class="ticket-tags"><span class="tag green">strategy</span></div>
+    </div>
+  </div>
+
+</div>
+
+</main>
+<div class="shell">
+  <div class="module-nav">
+    <a href="iac.html"><div class="lbl">&larr; Previous module</div><div class="ttl">IaC</div></a>
+    <a href="devsecops.html" class="next"><div class="lbl">Next module &rarr;</div><div class="ttl">DevSecOps</div></a>
+    </div>
+</div>
+<footer class="site-footer">
+  Built for interview prep &middot; 10 modules &middot; scenario-first, visual-first &middot; <a href="scenarios.html">jump to the full scenario bank &rarr;</a>
+</footer>
+<script src="assets/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Terraform & Ansible · AZ-OPS Readiness Board</title>
+<meta name="description" content="Scenario-based interview prep for Senior Azure DevOps / Cloud Architect roles — Kubernetes, CI/CD, IaC, monitoring, incident response, DevSecOps and Azure architecture.">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="statusbar">
+      <span class="dot"></span><b>ALL SYSTEMS NOMINAL</b><span class="sep">|</span>
+      <span>module: <b>IaC</b></span><span class="sep">|</span>
+      <span>env: <b>interview-prep</b></span><span class="sep">|</span>
+      <span>region: <b>study-local</b></span>
+      <span class="fill"></span>
+      <span data-live-clock>00:00:00 UTC</span>
+    </div>
+  <div class="header-inner">
+    <a class="brand" href="index.html">
+      <span class="mark">AZ</span>
+      <span>AZ-OPS Board<small>Senior Azure DevOps &middot; Interview Readiness</small></span>
+    </a>
+    <button class="nav-toggle" aria-label="Toggle navigation">MENU</button>
+    <nav class="main-nav">
+        <a href="index.html">Overview</a>
+        <a href="kubernetes.html">Kubernetes</a>
+        <a href="cicd-git.html">CI/CD & Git</a>
+        <a href="iac.html" class="active">IaC</a>
+        <a href="monitoring-incident.html">Monitoring & Incidents</a>
+        <a href="devsecops.html">DevSecOps</a>
+        <a href="azure-landing-zone.html">Landing Zone & DR</a>
+        <a href="azure-networking.html">Networking</a>
+        <a href="azure-identity-security.html">Identity & Security</a>
+        <a href="scenarios.html">Scenario Bank</a>
+    </nav>
+  </div>
+</header>
+<main>
+<div class="shell page-hero">
+  <div class="eyebrow"><span class="dot" style="background:var(--terraform); box-shadow:0 0 6px var(--terraform);"></span> Module 03</div>
+  <h1>Infrastructure as Code: Terraform &amp; Ansible</h1>
+  <p class="lede">"Implement and maintain IaC using Terraform and Ansible to provision, configure, and manage scalable infrastructure." The interview tests whether you understand <em>why</em> two tools exist here, not just command syntax.</p>
+</div>
+
+<div class="shell section">
+  <div class="section-head"><div><h2>Where Terraform ends and Ansible begins</h2>
+  <p class="section-desc">The most common conceptual trap: using one tool for the other's job.</p></div></div>
+
+  <div class="diagram-frame">
+    <svg viewBox="0 0 1180 230" xmlns="http://www.w3.org/2000/svg" font-family="JetBrains Mono, monospace">
+      <rect x="20" y="20" width="560" height="190" rx="10" fill="rgba(123,91,224,0.07)" stroke="#7b5be0"/>
+      <text x="300" y="44" fill="#7b5be0" font-size="12" text-anchor="middle">TERRAFORM — declarative, provisions infrastructure</text>
+      <text x="300" y="70" fill="#e7edf3" font-size="10.5" text-anchor="middle">"What should exist" — VNets, VMs, AKS clusters, storage,</text>
+      <text x="300" y="88" fill="#e7edf3" font-size="10.5" text-anchor="middle">IAM role assignments, DNS records</text>
+      <rect x="60" y="110" width="120" height="60" rx="6" fill="#161f2a" stroke="#212c39"/><text x="120" y="135" fill="#e7edf3" font-size="9" text-anchor="middle">Resource</text><text x="120" y="150" fill="#a9b6c4" font-size="8" text-anchor="middle">graph +</text><text x="120" y="162" fill="#a9b6c4" font-size="8" text-anchor="middle">state file</text>
+      <rect x="200" y="110" width="120" height="60" rx="6" fill="#161f2a" stroke="#212c39"/><text x="260" y="135" fill="#e7edf3" font-size="9" text-anchor="middle">plan</text><text x="260" y="150" fill="#a9b6c4" font-size="8" text-anchor="middle">diff vs</text><text x="260" y="162" fill="#a9b6c4" font-size="8" text-anchor="middle">real world</text>
+      <rect x="340" y="110" width="120" height="60" rx="6" fill="#161f2a" stroke="#212c39"/><text x="400" y="135" fill="#e7edf3" font-size="9" text-anchor="middle">apply</text><text x="400" y="150" fill="#a9b6c4" font-size="8" text-anchor="middle">idempotent</text><text x="400" y="162" fill="#a9b6c4" font-size="8" text-anchor="middle">reconcile</text>
+      <rect x="480" y="110" width="80" height="60" rx="6" fill="#161f2a" stroke="#212c39"/><text x="520" y="135" fill="#e7edf3" font-size="9" text-anchor="middle">cloud</text><text x="520" y="150" fill="#a9b6c4" font-size="8" text-anchor="middle">API</text>
+      <text x="300" y="196" fill="#6d7d8d" font-size="8.5" text-anchor="middle">stops at "the VM exists" — does not configure what runs inside it</text>
+
+      <rect x="600" y="20" width="560" height="190" rx="10" fill="rgba(53,211,153,0.06)" stroke="#35d399"/>
+      <text x="880" y="44" fill="#35d399" font-size="12" text-anchor="middle">ANSIBLE — procedural, configures what's inside</text>
+      <text x="880" y="70" fill="#e7edf3" font-size="10.5" text-anchor="middle">"What should run" — packages, services, users, config files,</text>
+      <text x="880" y="88" fill="#e7edf3" font-size="10.5" text-anchor="middle">app deployment on existing VMs, day-2 config drift correction</text>
+      <rect x="640" y="110" width="120" height="60" rx="6" fill="#161f2a" stroke="#212c39"/><text x="700" y="135" fill="#e7edf3" font-size="9" text-anchor="middle">inventory</text><text x="700" y="150" fill="#a9b6c4" font-size="8" text-anchor="middle">hosts to</text><text x="700" y="162" fill="#a9b6c4" font-size="8" text-anchor="middle">target</text>
+      <rect x="780" y="110" width="120" height="60" rx="6" fill="#161f2a" stroke="#212c39"/><text x="840" y="135" fill="#e7edf3" font-size="9" text-anchor="middle">playbook</text><text x="840" y="150" fill="#a9b6c4" font-size="8" text-anchor="middle">ordered</text><text x="840" y="162" fill="#a9b6c4" font-size="8" text-anchor="middle">tasks</text>
+      <rect x="920" y="110" width="120" height="60" rx="6" fill="#161f2a" stroke="#212c39"/><text x="980" y="135" fill="#e7edf3" font-size="9" text-anchor="middle">SSH / WinRM</text><text x="980" y="150" fill="#a9b6c4" font-size="8" text-anchor="middle">agentless</text><text x="980" y="162" fill="#a9b6c4" font-size="8" text-anchor="middle">push model</text>
+      <text x="880" y="196" fill="#6d7d8d" font-size="8.5" text-anchor="middle">common pairing: Terraform provisions the VM → outputs its IP into the Ansible inventory</text>
+
+      <line x1="580" y1="115" x2="600" y2="115" stroke="#5d7284" stroke-width="0" />
+    </svg>
+    <div class="diagram-caption">// rule of thumb interviewers listen for: "Terraform gets me a server, Ansible gets the server ready to do work."</div>
+  </div>
+</div>
+
+<div class="shell section">
+  <div class="section-head"><div><h2>State: the part everyone gets tested on</h2></div></div>
+  <div class="grid grid-3">
+    <div class="panel panel-pad"><div class="panel-title">Remote backend</div><p class="text-dim" style="font-size:13px;">Store state in Azure Storage (blob) or Terraform Cloud — never local <code>.tfstate</code> for team infrastructure. Enables shared, versioned, recoverable state.</p></div>
+    <div class="panel panel-pad"><div class="panel-title">State locking</div><p class="text-dim" style="font-size:13px;">Azure blob leases (or DynamoDB for AWS) prevent two <code>apply</code> runs from racing and corrupting state simultaneously.</p></div>
+    <div class="panel panel-pad"><div class="panel-title">Drift</div><p class="text-dim" style="font-size:13px;">Someone changes a resource in the portal by hand — state now disagrees with reality. <code>terraform plan</code> surfaces it; <code>import</code> or re-apply reconciles it.</p></div>
+  </div>
+</div>
+
+<div class="shell section">
+  <div class="section-head"><div><h2>Incident queue — IaC</h2></div></div>
+
+  <div class="ticket" data-sev="1">
+    <div class="ticket-head"><span class="ticket-id">IAC-301</span><span class="sev-badge s1">SEV-1</span><span class="ticket-q">Two engineers ran <code>terraform apply</code> at the same time and the state file is now corrupted. What happened, and how do you prevent it?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <p>Without a remote backend + locking, concurrent applies can both read the same state, make conflicting writes, and the last write wins — silently dropping the other's changes or leaving orphaned resources. Fix going forward: remote state in Azure Storage with native locking, and force all applies through CI/CD (no local applies against shared state) so there's only ever one writer.</p>
+      <div class="resolution-box"><p class="sub">Recovery</p><p>Terraform Storage backend keeps state <strong>versioning</strong> — restore the last known-good version from blob snapshot history, then reconcile with a fresh <code>plan</code> to see what's actually drifted before touching anything.</p></div>
+      <div class="ticket-tags"><span class="tag violet">state</span><span class="tag red">incident</span></div>
+    </div>
+  </div>
+
+  <div class="ticket" data-sev="2">
+    <div class="ticket-head"><span class="ticket-id">IAC-302</span><span class="sev-badge s2">SEV-2</span><span class="ticket-q"><code>terraform plan</code> wants to destroy and recreate a production database. Nothing in the code looks like it should change that. Why?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <p>Classic causes: a change to an immutable attribute (some arguments force replacement, not update-in-place — check the provider docs for <code>ForceNew</code>/"requires replacement"), a provider version bump that changed a default, or someone edited the resource out-of-band so Terraform's plan is "correcting" drift in the most destructive way possible.</p>
+      <div class="resolution-box"><p class="sub">Resolution</p><p>Never trust a destructive plan blindly on stateful resources — read the plan's "forces replacement" reason line by line, and for genuinely risky resources use <code>lifecycle { prevent_destroy = true }</code> as a guardrail.</p></div>
+      <div class="pitfall-box"><p class="sub">Pitfall</p><p>Running <code>apply</code> without reading the plan output in a live interview scenario is an instant red flag — always narrate "I'd read the plan first."</p></div>
+      <div class="ticket-tags"><span class="tag violet">terraform</span><span class="tag red">troubleshooting</span></div>
+    </div>
+  </div>
+
+  <div class="ticket" data-sev="2">
+    <div class="ticket-head"><span class="ticket-id">IAC-303</span><span class="sev-badge s2">SEV-2</span><span class="ticket-q">How do you structure Terraform for dev/staging/prod — workspaces, or separate state per environment?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <p>Prefer <strong>separate state files per environment</strong> (via separate directories/backends, or a module + tfvars per env) over Terraform workspaces for prod-grade separation — workspaces share the same backend config and code path, which makes it too easy for a mistake in one workspace to bleed into another. Reusable modules + per-environment variable files give the same DRY-ness with a harder blast-radius boundary.</p>
+      <div class="ticket-tags"><span class="tag violet">terraform</span><span class="tag green">structure</span></div>
+    </div>
+  </div>
+
+  <div class="ticket" data-sev="2">
+    <div class="ticket-head"><span class="ticket-id">IAC-304</span><span class="sev-badge s2">SEV-2</span><span class="ticket-q">A secret (client secret / connection string) got committed into a Terraform file. What now?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <ul>
+        <li>Rotate the secret immediately — removing it from Git history does <em>not</em> undo exposure, treat it as compromised.</li>
+        <li>Purge it from Git history (<code>git filter-repo</code> / BFG) as a secondary cleanup step, not the primary fix.</li>
+        <li>Long-term: pull secrets from Key Vault via a data source at plan/apply time, add pre-commit secret scanning, and mark sensitive Terraform variables with <code>sensitive = true</code> so they're redacted from CLI/plan output.</li>
+      </ul>
+      <div class="ticket-tags"><span class="tag red">security</span><span class="tag violet">terraform</span></div>
+    </div>
+  </div>
+
+  <div class="ticket" data-sev="3">
+    <div class="ticket-head"><span class="ticket-id">IAC-305</span><span class="sev-badge s3">SEV-3</span><span class="ticket-q">Write the shape of a reusable Terraform module for an AKS cluster. What goes in, what comes out?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <div class="snippet"><span class="c"># modules/aks/variables.tf</span>
+variable <span class="s">"cluster_name"</span> { type = string }
+variable <span class="s">"node_count"</span>   { type = number, default = 3 }
+variable <span class="s">"vnet_subnet_id"</span> { type = string }
+
+<span class="c"># modules/aks/outputs.tf</span>
+output <span class="s">"cluster_id"</span>      { value = azurerm_kubernetes_cluster.this.id }
+output <span class="s">"kube_config"</span>     { value = azurerm_kubernetes_cluster.this.kube_config_raw, sensitive = true }
+output <span class="s">"identity_principal_id"</span> { value = azurerm_kubernetes_cluster.this.identity[0].principal_id }</div>
+      <p>Inputs are the things that legitimately vary per environment; outputs are what other modules (networking, IAM role assignments) need to wire up next — this is what makes modules composable instead of copy-pasted.</p>
+      <div class="ticket-tags"><span class="tag violet">terraform</span><span class="tag blue">modules</span></div>
+    </div>
+  </div>
+
+  <div class="ticket" data-sev="2">
+    <div class="ticket-head"><span class="ticket-id">IAC-306</span><span class="sev-badge s2">SEV-2</span><span class="ticket-q">An Ansible playbook run is not idempotent — running it twice changes things the second time too. How do you fix it?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <p>Usually caused by using <code>shell</code>/<code>command</code> modules for tasks that have a proper idempotent module (e.g. <code>shell: apt-get install nginx</code> instead of the <code>apt</code> module, which checks state first). Fix: use resource-oriented modules wherever they exist, and for genuine shell steps add <code>creates:</code>/<code>changed_when:</code> conditions so Ansible can correctly report "no change needed."</p>
+      <div class="ticket-tags"><span class="tag green">ansible</span></div>
+    </div>
+  </div>
+
+  <div class="ticket" data-sev="2">
+    <div class="ticket-head"><span class="ticket-id">IAC-307</span><span class="sev-badge s2">SEV-2</span><span class="ticket-q">Terraform apply is taking 40 minutes for a plan with 15 resources. What would you investigate?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <ul>
+        <li>Cloud API rate limiting/throttling on the provider — check for 429s in verbose (<code>TF_LOG=DEBUG</code>) output.</li>
+        <li>Resources with genuinely slow provisioning (e.g. AKS cluster creation, VPN gateways) vs. resources stuck due to a dependency misconfiguration.</li>
+        <li>Unnecessary serialization — resources that could apply in parallel but are chained by an implicit dependency (e.g. referencing an unrelated attribute just to force ordering).</li>
+      </ul>
+      <div class="ticket-tags"><span class="tag violet">terraform</span><span class="tag amber">performance</span></div>
+    </div>
+  </div>
+
+  <div class="ticket" data-sev="1">
+    <div class="ticket-head"><span class="ticket-id">IAC-308</span><span class="sev-badge s1">SEV-1</span><span class="ticket-q">You need to bring an existing, manually-created production VNet under Terraform management without downtime. Approach?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <p>Write the Terraform resource block matching the existing resource's configuration, then <code>terraform import</code> its Azure resource ID into state, and immediately run <code>plan</code> — a clean "no changes" plan confirms your code accurately matches reality. Iterate on the code (not the live resource) until the plan is empty before ever running <code>apply</code>, so the first real apply makes zero changes.</p>
+      <div class="ticket-tags"><span class="tag violet">terraform</span><span class="tag blue">migration</span></div>
+    </div>
+  </div>
+
+  <div class="ticket" data-sev="2">
+    <div class="ticket-head"><span class="ticket-id">IAC-309</span><span class="sev-badge s2">SEV-2</span><span class="ticket-q">How do you test infrastructure code before it ever reaches production?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <ul>
+        <li><code>terraform validate</code> + <code>fmt -check</code> in CI for syntax/style.</li>
+        <li>Static policy checks (<code>tfsec</code>, <code>checkov</code>, or Sentinel/OPA) to catch insecure configs (open NSGs, public storage) before apply.</li>
+        <li><code>terraform plan</code> posted as a CI comment on the merge request for human review — the diff <em>is</em> the review.</li>
+        <li>Apply to a real short-lived sandbox/staging subscription for higher-risk modules before prod.</li>
+      </ul>
+      <div class="ticket-tags"><span class="tag violet">terraform</span><span class="tag red">devsecops</span></div>
+    </div>
+  </div>
+
+  <div class="ticket" data-sev="3">
+    <div class="ticket-head"><span class="ticket-id">IAC-310</span><span class="sev-badge s3">SEV-3</span><span class="ticket-q">When would you choose Bicep over Terraform for Azure, given both are in scope for this role?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <p><strong>Bicep</strong> is Azure-native (compiles to ARM), gets day-one support for brand-new Azure resource types, and needs no state file — Azure Resource Manager itself is the source of truth. <strong>Terraform</strong> is cloud-agnostic, has a larger module ecosystem, and is the better choice in multi-cloud or hybrid estates, or where the org has existing Terraform investment. In an Azure-only shop with a small platform team, Bicep reduces operational surface area (no state backend to manage); in a mixed-cloud org, Terraform's one tool for everything usually wins.</p>
+      <div class="ticket-tags"><span class="tag blue">azure</span><span class="tag violet">terraform</span></div>
+    </div>
+  </div>
+
+</div>
+
+</main>
+<div class="shell">
+  <div class="module-nav">
+    <a href="cicd-git.html"><div class="lbl">&larr; Previous module</div><div class="ttl">CI/CD & Git</div></a>
+    <a href="monitoring-incident.html" class="next"><div class="lbl">Next module &rarr;</div><div class="ttl">Monitoring & Incidents</div></a>
+    </div>
+</div>
+<footer class="site-footer">
+  Built for interview prep &middot; 10 modules &middot; scenario-first, visual-first &middot; <a href="scenarios.html">jump to the full scenario bank &rarr;</a>
+</footer>
+<script src="assets/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Azure Networking · AZ-OPS Readiness Board</title>
+<meta name="description" content="Scenario-based interview prep for Senior Azure DevOps / Cloud Architect roles — Kubernetes, CI/CD, IaC, monitoring, incident response, DevSecOps and Azure architecture.">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="statusbar">
+      <span class="dot"></span><b>ALL SYSTEMS NOMINAL</b><span class="sep">|</span>
+      <span>module: <b>Networking</b></span><span class="sep">|</span>
+      <span>env: <b>interview-prep</b></span><span class="sep">|</span>
+      <span>region: <b>study-local</b></span>
+      <span class="fill"></span>
+      <span data-live-clock>00:00:00 UTC</span>
+    </div>
+  <div class="header-inner">
+    <a class="brand" href="index.html">
+      <span class="mark">AZ</span>
+      <span>AZ-OPS Board<small>Senior Azure DevOps &middot; Interview Readiness</small></span>
+    </a>
+    <button class="nav-toggle" aria-label="Toggle navigation">MENU</button>
+    <nav class="main-nav">
+        <a href="index.html">Overview</a>
+        <a href="kubernetes.html">Kubernetes</a>
+        <a href="cicd-git.html">CI/CD & Git</a>
+        <a href="iac.html">IaC</a>
+        <a href="monitoring-incident.html">Monitoring & Incidents</a>
+        <a href="devsecops.html">DevSecOps</a>
+        <a href="azure-landing-zone.html">Landing Zone & DR</a>
+        <a href="azure-networking.html" class="active">Networking</a>
+        <a href="azure-identity-security.html">Identity & Security</a>
+        <a href="scenarios.html">Scenario Bank</a>
+    </nav>
+  </div>
+</header>
+<main>
+<div class="shell page-hero">
+  <div class="eyebrow"><span class="dot"></span> Module 07 · Cloud Architect track</div>
+  <h1>Azure networking at enterprise scale</h1>
+  <p class="lede">"Manage complex Azure Networking: Hub &amp; Spoke, Virtual WAN, Application Gateway WAF, Private Link, and ExpressRoute." This is where most architect interviews go deepest — draw the topology, then defend every hop.</p>
+</div>
+
+<div class="shell section">
+  <div class="section-head"><div><h2>Hub &amp; spoke topology</h2><p class="section-desc">The default enterprise pattern: shared services centralized, workloads isolated.</p></div></div>
+  <div class="diagram-frame">
+    <svg viewBox="0 0 1180 340" xmlns="http://www.w3.org/2000/svg" font-family="JetBrains Mono, monospace">
+      <defs><marker id="a5" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#5d7284"/></marker></defs>
+
+      <!-- On-prem -->
+      <rect x="20" y="140" width="140" height="60" rx="8" fill="none" stroke="#6d7d8d" stroke-dasharray="4 3"/>
+      <text x="90" y="165" fill="#a9b6c4" font-size="10" text-anchor="middle">On-premises</text>
+      <text x="90" y="182" fill="#6d7d8d" font-size="8.5" text-anchor="middle">datacenter</text>
+
+      <line x1="160" y1="170" x2="220" y2="170" stroke="#3fa9f5" stroke-width="2" marker-end="url(#a5)"/>
+      <text x="190" y="160" fill="#3fa9f5" font-size="8">ExpressRoute</text>
+
+      <!-- Hub -->
+      <rect x="220" y="90" width="230" height="160" rx="10" fill="rgba(63,169,245,0.08)" stroke="#3fa9f5" stroke-width="1.5"/>
+      <text x="335" y="110" fill="#3fa9f5" font-size="10.5" text-anchor="middle">HUB VNet</text>
+      <rect x="240" y="120" width="90" height="34" rx="6" fill="#161f2a" stroke="#212c39"/><text x="285" y="141" fill="#e7edf3" font-size="8" text-anchor="middle">Firewall</text>
+      <rect x="340" y="120" width="90" height="34" rx="6" fill="#161f2a" stroke="#212c39"/><text x="385" y="141" fill="#e7edf3" font-size="8" text-anchor="middle">VPN GW</text>
+      <rect x="240" y="164" width="90" height="34" rx="6" fill="#161f2a" stroke="#212c39"/><text x="285" y="185" fill="#e7edf3" font-size="8" text-anchor="middle">ExpressRoute GW</text>
+      <rect x="340" y="164" width="90" height="34" rx="6" fill="#161f2a" stroke="#212c39"/><text x="385" y="185" fill="#e7edf3" font-size="8" text-anchor="middle">Bastion</text>
+      <rect x="240" y="208" width="190" height="30" rx="6" fill="#161f2a" stroke="#212c39"/><text x="335" y="228" fill="#e7edf3" font-size="8" text-anchor="middle">DNS / shared services</text>
+
+      <!-- peering lines -->
+      <line x1="450" y1="130" x2="540" y2="80" stroke="#5d7284" stroke-width="1.5"/>
+      <line x1="450" y1="170" x2="540" y2="170" stroke="#5d7284" stroke-width="1.5"/>
+      <line x1="450" y1="210" x2="540" y2="260" stroke="#5d7284" stroke-width="1.5"/>
+      <text x="480" y="105" fill="#6d7d8d" font-size="7.5">VNet peering</text>
+
+      <!-- spokes -->
+      <rect x="540" y="40" width="200" height="80" rx="8" fill="rgba(139,123,240,0.08)" stroke="#8b7bf0"/>
+      <text x="640" y="62" fill="#8b7bf0" font-size="9.5" text-anchor="middle">Spoke: Prod workload</text>
+      <text x="640" y="80" fill="#a9b6c4" font-size="8" text-anchor="middle">AKS / App subnet</text>
+      <text x="640" y="94" fill="#a9b6c4" font-size="8" text-anchor="middle">NSG per subnet</text>
+      <text x="640" y="108" fill="#a9b6c4" font-size="8" text-anchor="middle">no direct internet route</text>
+
+      <rect x="540" y="130" width="200" height="80" rx="8" fill="rgba(53,211,153,0.08)" stroke="#35d399"/>
+      <text x="640" y="152" fill="#35d399" font-size="9.5" text-anchor="middle">Spoke: Data</text>
+      <text x="640" y="170" fill="#a9b6c4" font-size="8" text-anchor="middle">SQL / Storage w/ Private Link</text>
+      <text x="640" y="184" fill="#a9b6c4" font-size="8" text-anchor="middle">no public endpoint</text>
+
+      <rect x="540" y="220" width="200" height="80" rx="8" fill="rgba(245,166,35,0.08)" stroke="#f5a623"/>
+      <text x="640" y="242" fill="#f5a623" font-size="9.5" text-anchor="middle">Spoke: Dev/Test</text>
+      <text x="640" y="260" fill="#a9b6c4" font-size="8" text-anchor="middle">isolated, tighter policy</text>
+      <text x="640" y="274" fill="#a9b6c4" font-size="8" text-anchor="middle">no route to Prod spoke</text>
+
+      <!-- inbound path -->
+      <rect x="800" y="40" width="180" height="55" rx="8" fill="rgba(63,169,245,0.12)" stroke="#3fa9f5"/>
+      <text x="890" y="62" fill="#3fa9f5" font-size="9.5" text-anchor="middle">App Gateway + WAF</text>
+      <text x="890" y="78" fill="#a9b6c4" font-size="8" text-anchor="middle">public entry point</text>
+      <line x1="740" y1="80" x2="800" y2="67" stroke="#5d7284" marker-end="url(#a5)"/>
+
+      <rect x="1010" y="40" width="150" height="55" rx="8" fill="none" stroke="#6d7d8d" stroke-dasharray="4 3"/>
+      <text x="1085" y="62" fill="#a9b6c4" font-size="9.5" text-anchor="middle">Internet</text>
+      <text x="1085" y="78" fill="#6d7d8d" font-size="8" text-anchor="middle">public users</text>
+      <line x1="1010" y1="67" x2="980" y2="67" stroke="#5d7284" marker-end="url(#a5)"/>
+
+      <text x="335" y="320" fill="#6d7d8d" font-size="9" text-anchor="middle">spoke-to-spoke traffic is forced through the hub firewall — spokes never peer directly with each other</text>
+    </svg>
+    <div class="diagram-caption">// key rule interviewers check for: spokes route to each other <em>through</em> the hub firewall via UDRs — they do not peer directly.</div>
+  </div>
+</div>
+
+<div class="shell section">
+  <div class="section-head"><div><h2>Hub &amp; spoke vs. Virtual WAN</h2></div></div>
+  <div class="tbl-wrap">
+    <table class="cmp">
+      <tr><th></th><th>Hub &amp; Spoke (manual)</th><th>Virtual WAN</th></tr>
+      <tr><td><strong>Management</strong></td><td>You build and peer every hub/spoke yourself</td><td>Microsoft-managed backbone; hubs are a managed resource</td></tr>
+      <tr><td><strong>Scale</strong></td><td>Peering limits and manual UDR maintenance get complex past a handful of regions</td><td>Built for many regions/branches — any-to-any routing is automatic</td></tr>
+      <tr><td><strong>Branch connectivity</strong></td><td>You configure VPN/ExpressRoute per hub</td><td>Native integration for SD-WAN/branch sites at scale</td></tr>
+      <tr><td><strong>Best for</strong></td><td>Simpler estates, full control over routing/firewall placement</td><td>Global orgs with many regions, branches, or M&amp;A-driven growth</td></tr>
+    </table>
+  </div>
+</div>
+
+<div class="shell section">
+  <div class="section-head"><div><h2>Incident queue — Networking</h2></div></div>
+
+  <div class="ticket" data-sev="1">
+    <div class="ticket-head"><span class="ticket-id">NET-701</span><span class="sev-badge s1">SEV-1</span><span class="ticket-q">A workload in Spoke A can't reach a database in Spoke B. Both VNets are peered to the hub. Diagnose it.</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <ul>
+        <li>Peering to the hub does <strong>not</strong> transitively connect spokes — confirm there's a User Defined Route (UDR) on each spoke's subnet sending 0.0.0.0/0 (or the specific spoke CIDR) via the hub firewall's private IP as next hop.</li>
+        <li>Check the firewall's own rules (network/application rule collections) actually allow that spoke-to-spoke flow — a UDR routes traffic to the firewall, it doesn't permit it.</li>
+        <li>Check NSGs on both source and destination subnets for the specific ports.</li>
+      </ul>
+      <div class="resolution-box"><p class="sub">Resolution</p><p>Add/fix the UDR forcing spoke traffic through the hub NVA/firewall, and add an explicit allow rule on the firewall for that flow — this two-part check (routing exists + is permitted) is the core hub-spoke troubleshooting pattern.</p></div>
+      <div class="ticket-tags"><span class="tag blue">connectivity</span><span class="tag red">troubleshooting</span></div>
+    </div>
+  </div>
+
+  <div class="ticket" data-sev="2">
+    <div class="ticket-head"><span class="ticket-id">NET-702</span><span class="sev-badge s2">SEV-2</span><span class="ticket-q">Users report intermittent slow responses only for traffic coming through the Application Gateway WAF. How do you isolate whether it's the WAF or the backend?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <ul>
+        <li>Check Application Gateway backend health probes and metrics — is latency added at the gateway hop itself, or is the backend genuinely slow and the gateway is just the entry point you happen to be measuring from?</li>
+        <li>Check WAF logs for rule evaluation overhead or false-positive blocks causing retries.</li>
+        <li>Compare gateway-to-backend latency metric vs. client-to-gateway latency to isolate the segment.</li>
+      </ul>
+      <div class="ticket-tags"><span class="tag blue">networking</span><span class="tag amber">performance</span></div>
+    </div>
+  </div>
+
+  <div class="ticket" data-sev="2">
+    <div class="ticket-head"><span class="ticket-id">NET-703</span><span class="sev-badge s2">SEV-2</span><span class="ticket-q">A storage account was moved behind Private Link but an on-prem application can no longer resolve its hostname. Why, and how do you fix it?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <p>Private Link relies on a Private DNS Zone that resolves the storage account's public FQDN to its private IP — <strong>inside Azure</strong>. On-prem DNS servers don't automatically know about that private zone. Fix: conditional forwarder on the on-prem DNS server pointing the relevant zone (e.g. <code>privatelink.blob.core.windows.net</code>) to a DNS resolver inside the hub VNet (Azure DNS Private Resolver or a VM running as forwarder), so on-prem clients resolve to the private IP too.</p>
+      <div class="ticket-tags"><span class="tag blue">dns</span><span class="tag red">troubleshooting</span></div>
+    </div>
+  </div>
+
+  <div class="ticket" data-sev="3">
+    <div class="ticket-head"><span class="ticket-id">NET-704</span><span class="sev-badge s3">SEV-3</span><span class="ticket-q">Explain Private Link vs. Service Endpoint — why would you choose the more complex one?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <p><strong>Service Endpoint</strong> keeps traffic on the Azure backbone and restricts a PaaS resource's firewall to specific VNet/subnets — but the resource still has a <em>public</em> IP/endpoint, just with network-level ACLs. <strong>Private Link</strong> injects a private IP for the resource directly into your VNet — no public endpoint exists for that connection at all, traffic never touches the public internet path, and it works across peered VNets, on-prem (via VPN/ExpressRoute), and even other tenants. Choose Private Link whenever "no public exposure, period" is a compliance requirement, not just "restricted by IP."</p>
+      <div class="ticket-tags"><span class="tag blue">fundamentals</span></div>
+    </div>
+  </div>
+
+  <div class="ticket" data-sev="1">
+    <div class="ticket-head"><span class="ticket-id">NET-705</span><span class="sev-badge s1">SEV-1</span><span class="ticket-q">The ExpressRoute circuit just went down. On-prem users can't reach Azure resources. What's your immediate action and what's the durable fix?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <p>Immediate: confirm scope via Azure Service Health and the ExpressRoute circuit's provider-side status; if a Site-to-Site VPN gateway exists as backup, traffic should already be failing over automatically via BGP route priority — verify it did. If no backup path exists, that's the actual finding here. Durable fix: every production ExpressRoute circuit should have a VPN failover path (or a second circuit via a different peering location/provider for true redundancy) — a single circuit is a single point of failure, no matter how reliable the provider's SLA is.</p>
+      <div class="ticket-tags"><span class="tag red">disaster-recovery</span><span class="tag blue">connectivity</span></div>
+    </div>
+  </div>
+
+  <div class="ticket" data-sev="2">
+    <div class="ticket-head"><span class="ticket-id">NET-706</span><span class="sev-badge s2">SEV-2</span><span class="ticket-q">How do you expose an internal API to a partner company without putting it on the public internet?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <p>Publish it as an <strong>Azure Private Link Service</strong> behind a Standard Load Balancer — the partner (with their own Azure tenant) creates a Private Endpoint in their VNet that connects to your service over the Microsoft backbone, with connection approval on your side. No public IP, no VPN/ExpressRoute needed between the two organizations, and you can revoke access instantly by rejecting/removing the connection.</p>
+      <div class="ticket-tags"><span class="tag blue">design</span><span class="tag red">security</span></div>
+    </div>
+  </div>
+
+  <div class="ticket" data-sev="2">
+    <div class="ticket-head"><span class="ticket-id">NET-707</span><span class="sev-badge s2">SEV-2</span><span class="ticket-q">WAF is blocking a legitimate customer request as a false positive (e.g. flagged as SQL injection). How do you fix it without disabling protection broadly?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <p>Check WAF logs for the specific matched rule ID, then add a scoped exclusion (specific rule + specific request attribute/parameter, e.g. exclude a rule only for one query-string parameter known to contain SQL-like text legitimately) rather than switching the WAF to Detection-only mode or disabling the whole rule set — that would remove protection for every other request, not just this false positive.</p>
+      <div class="ticket-tags"><span class="tag red">security</span><span class="tag blue">networking</span></div>
+    </div>
+  </div>
+
+  <div class="ticket" data-sev="3">
+    <div class="ticket-head"><span class="ticket-id">NET-708</span><span class="sev-badge s3">SEV-3</span><span class="ticket-q">Why do spokes route through a central firewall instead of each having their own NAT/firewall to the internet?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <p>Centralizing egress/ingress inspection gives one consistent policy surface, one place to see all north-south traffic logs for security monitoring, and avoids each application team configuring (and misconfiguring) their own firewall independently. The trade-off is the hub firewall becomes a shared dependency and potential bottleneck/single point of failure — mitigated by deploying it in a zone-redundant/HA SKU and sizing for aggregate spoke traffic, not per-spoke.</p>
+      <div class="ticket-tags"><span class="tag blue">design</span></div>
+    </div>
+  </div>
+
+  <div class="ticket" data-sev="2">
+    <div class="ticket-head"><span class="ticket-id">NET-709</span><span class="sev-badge s2">SEV-2</span><span class="ticket-q">You need to give 40 branch offices connectivity to Azure with minimal ongoing operational overhead. Hub &amp; spoke or vWAN?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <p>Virtual WAN — at 40 branches, manually managing VPN/ExpressRoute gateways, peerings, and routing tables per hub in a DIY hub-and-spoke becomes a full-time job and a common source of routing mistakes. vWAN's managed hubs give any-to-any transitive routing between branches and VNets out of the box, which is exactly the problem at this scale.</p>
+      <div class="ticket-tags"><span class="tag blue">design</span></div>
+    </div>
+  </div>
+
+  <div class="ticket" data-sev="2">
+    <div class="ticket-head"><span class="ticket-id">NET-710</span><span class="sev-badge s2">SEV-2</span><span class="ticket-q">A new NSG rule was deployed and now health probes to a VM's backend pool are failing intermittently in the Load Balancer.</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <p>Azure Load Balancer health probes originate from a special virtual IP (168.63.129.16) — a common mistake is an NSG rule that blocks it without realizing that's the platform's own probe source, not "an unknown IP" to lock down. Confirm the NSG still allows the AzureLoadBalancer service tag; if it was recently tightened to explicit IPs, that's very likely the regression.</p>
+      <div class="ticket-tags"><span class="tag blue">troubleshooting</span></div>
+    </div>
+  </div>
+
+</div>
+
+</main>
+<div class="shell">
+  <div class="module-nav">
+    <a href="azure-landing-zone.html"><div class="lbl">&larr; Previous module</div><div class="ttl">Landing Zone & DR</div></a>
+    <a href="azure-identity-security.html" class="next"><div class="lbl">Next module &rarr;</div><div class="ttl">Identity & Security</div></a>
+    </div>
+</div>
+<footer class="site-footer">
+  Built for interview prep &middot; 10 modules &middot; scenario-first, visual-first &middot; <a href="scenarios.html">jump to the full scenario bank &rarr;</a>
+</footer>
+<script src="assets/main.js"></script>
+</body>
+</html>

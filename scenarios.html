@@ -1,0 +1,919 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Full Scenario Bank · AZ-OPS Readiness Board</title>
+<meta name="description" content="Scenario-based interview prep for Senior Azure DevOps / Cloud Architect roles — Kubernetes, CI/CD, IaC, monitoring, incident response, DevSecOps and Azure architecture.">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="statusbar">
+      <span class="dot"></span><b>ALL SYSTEMS NOMINAL</b><span class="sep">|</span>
+      <span>module: <b>Scenario Bank</b></span><span class="sep">|</span>
+      <span>env: <b>interview-prep</b></span><span class="sep">|</span>
+      <span>region: <b>study-local</b></span>
+      <span class="fill"></span>
+      <span data-live-clock>00:00:00 UTC</span>
+    </div>
+  <div class="header-inner">
+    <a class="brand" href="index.html">
+      <span class="mark">AZ</span>
+      <span>AZ-OPS Board<small>Senior Azure DevOps &middot; Interview Readiness</small></span>
+    </a>
+    <button class="nav-toggle" aria-label="Toggle navigation">MENU</button>
+    <nav class="main-nav">
+        <a href="index.html">Overview</a>
+        <a href="kubernetes.html">Kubernetes</a>
+        <a href="cicd-git.html">CI/CD & Git</a>
+        <a href="iac.html">IaC</a>
+        <a href="monitoring-incident.html">Monitoring & Incidents</a>
+        <a href="devsecops.html">DevSecOps</a>
+        <a href="azure-landing-zone.html">Landing Zone & DR</a>
+        <a href="azure-networking.html">Networking</a>
+        <a href="azure-identity-security.html">Identity & Security</a>
+        <a href="scenarios.html" class="active">Scenario Bank</a>
+    </nav>
+  </div>
+</header>
+<main>
+<div class="shell page-hero">
+  <div class="eyebrow"><span class="dot"></span> Drill mode</div>
+  <h1>Full scenario bank</h1>
+  <p class="lede">Every incident ticket from all eight modules, in one queue — 86 scenario questions total. Filter to a topic for focused review, or leave it on "All" and go top to bottom as timed rapid-fire practice the night before the interview: read the question, say your answer out loud, then open the ticket to check yourself.</p>
+</div>
+
+<div class="shell section">
+  <div class="ticket-filterbar">
+        <button class="filter-btn active" data-filter="all">All (86)</button>
+    <button class="filter-btn" data-filter="kubernetes">Kubernetes (14)</button>
+    <button class="filter-btn" data-filter="cicd">CI/CD & Git (11)</button>
+    <button class="filter-btn" data-filter="iac">Terraform & Ansible (10)</button>
+    <button class="filter-btn" data-filter="monitoring">Monitoring & Incident Response (12)</button>
+    <button class="filter-btn" data-filter="devsecops">DevSecOps (9)</button>
+    <button class="filter-btn" data-filter="landing-zone">Landing Zone, Multi-Region & DR (10)</button>
+    <button class="filter-btn" data-filter="networking">Azure Networking (10)</button>
+    <button class="filter-btn" data-filter="identity">Identity & Security (10)</button>
+  </div>
+  <div style="display:flex; gap:10px; margin-bottom:22px;">
+    <button class="filter-btn" data-action="expand-all">+ expand all</button>
+    <button class="filter-btn" data-action="collapse-all">&minus; collapse all</button>
+  </div>
+<h3 class="bank-subhead" data-group="kubernetes"><span class="dot" style="background:var(--k8s);"></span>Kubernetes</h3>
+<div class="ticket" data-tags="kubernetes" data-sev="1">
+    <div class="ticket-head"><span class="ticket-id">K8S-101</span><span class="sev-badge s1">SEV-1</span><span class="ticket-q">A pod keeps restarting in <code>CrashLoopBackOff</code>. Walk me through your diagnosis.</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <p class="sub">Diagnose</p>
+      <ul>
+        <li><code>kubectl get pods -o wide</code> — confirm restart count and node placement.</li>
+        <li><code>kubectl describe pod &lt;pod&gt;</code> — check the <strong>Events</strong> section and last termination reason/exit code.</li>
+        <li><code>kubectl logs &lt;pod&gt; --previous</code> — the crashed container's logs, not the new attempt.</li>
+        <li>Exit code 1 = app error; 137 = SIGKILL, almost always <strong>OOMKilled</strong>; 143 = SIGTERM, graceful shutdown didn't finish in time.</li>
+      </ul>
+      <div class="resolution-box">
+        <p class="sub">Resolution</p>
+        <p>Match the exit code to a cause: bad config/env var → fix and redeploy; OOMKilled → raise <code>resources.limits.memory</code> or fix a leak; failing liveness probe → the app is up but the probe path/port/timing is wrong, not the app itself.</p>
+      </div>
+      <div class="pitfall-box">
+        <p class="sub">Pitfall</p>
+        <p>Candidates jump straight to "increase the memory limit" without reading <code>--previous</code> logs first — that's guessing, not diagnosing. Always show the evidence before the fix.</p>
+      </div>
+      <div class="ticket-tags"><span class="tag violet">workloads</span><span class="tag red">troubleshooting</span></div>
+    </div>
+  </div>
+<div class="ticket" data-tags="kubernetes" data-sev="2">
+    <div class="ticket-head"><span class="ticket-id">K8S-102</span><span class="sev-badge s2">SEV-2</span><span class="ticket-q">A new image was pushed but the deployment shows <code>ImagePullBackOff</code>.</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <p class="sub">Diagnose</p>
+      <ul>
+        <li><code>kubectl describe pod</code> Events will show the exact error: unauthorized, manifest unknown, or timeout.</li>
+        <li>Unauthorized → registry auth (<code>imagePullSecrets</code>) missing, expired, or not attached to the ServiceAccount.</li>
+        <li>Manifest unknown → tag doesn't exist (typo, or CI pushed to the wrong repo/tag).</li>
+        <li>Timeout → node can't reach the registry — check egress/firewall or private endpoint for ACR.</li>
+      </ul>
+      <div class="resolution-box"><p class="sub">Resolution</p><p>For AKS + ACR, prefer <code>az aks update --attach-acr</code> (grants AcrPull via managed identity) over long-lived pull secrets — removes an entire class of "secret expired" incidents.</p></div>
+      <div class="ticket-tags"><span class="tag violet">workloads</span><span class="tag blue">registry</span></div>
+    </div>
+  </div>
+<div class="ticket" data-tags="kubernetes" data-sev="1">
+    <div class="ticket-head"><span class="ticket-id">K8S-103</span><span class="sev-badge s1">SEV-1</span><span class="ticket-q">One node shows <code>NotReady</code> and its pods are stuck. What's your response?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <p class="sub">Diagnose</p>
+      <ul>
+        <li><code>kubectl describe node &lt;node&gt;</code> — check Conditions: MemoryPressure, DiskPressure, PIDPressure, kubelet heartbeat age.</li>
+        <li><code>kubectl get events --field-selector involvedObject.name=&lt;node&gt;</code> for kubelet/network plugin errors.</li>
+        <li>If it's a cloud VM, check the VMSS instance health in the Azure portal — could be an underlying host issue.</li>
+      </ul>
+      <div class="resolution-box"><p class="sub">Resolution</p><p>If the node is unrecoverable within your SLA: <code>kubectl cordon</code> to stop new scheduling, <code>kubectl drain --ignore-daemonsets --delete-emptydir-data</code> to evict workloads safely (respecting PodDisruptionBudgets), then let Cluster Autoscaler or the node pool replace it. Never force-delete a node with stateful pods still attached to PVCs without confirming failover.</p></div>
+      <div class="pitfall-box"><p class="sub">Pitfall</p><p>Draining without <code>--ignore-daemonsets</code> hangs forever since DaemonSet pods aren't meant to be evicted. Draining without checking PDBs can violate your own availability guarantees mid-incident.</p></div>
+      <div class="ticket-tags"><span class="tag violet">cluster-admin</span><span class="tag red">troubleshooting</span></div>
+    </div>
+  </div>
+<div class="ticket" data-tags="kubernetes" data-sev="2">
+    <div class="ticket-head"><span class="ticket-id">K8S-104</span><span class="sev-badge s2">SEV-2</span><span class="ticket-q">CPU usage is high but HPA never scales the deployment. Why?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <p class="sub">Diagnose</p>
+      <ul>
+        <li><code>kubectl describe hpa</code> — check the "current/target" metrics line; if it shows <code>&lt;unknown&gt;</code>, metrics-server isn't reporting.</li>
+        <li>Confirm the deployment has <code>resources.requests.cpu</code> set — HPA's percentage math is <em>usage ÷ request</em>, no request means no baseline.</li>
+        <li>Check <code>maxReplicas</code> hasn't already been hit, and that the node pool has room (Cluster Autoscaler may itself be the bottleneck).</li>
+      </ul>
+      <div class="resolution-box"><p class="sub">Resolution</p><p>Set explicit requests, confirm metrics-server/Prometheus adapter is healthy, and separate the two questions "did HPA decide to scale" (control plane) from "could the cluster fit the new pods" (capacity).</p></div>
+      <div class="ticket-tags"><span class="tag violet">autoscaling</span></div>
+    </div>
+  </div>
+<div class="ticket" data-tags="kubernetes" data-sev="2">
+    <div class="ticket-head"><span class="ticket-id">K8S-105</span><span class="sev-badge s2">SEV-2</span><span class="ticket-q">A pod is stuck in <code>Pending</code> with a PersistentVolumeClaim.</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <p class="sub">Diagnose</p>
+      <ul>
+        <li><code>kubectl describe pvc</code> and <code>kubectl describe pod</code> — Events usually say exactly why: no matching StorageClass, zone mismatch, or quota exceeded.</li>
+        <li>In AKS, a classic case: the PVC's disk was provisioned in zone-1 but the pod got scheduled to a node in zone-2 (zonal Azure Disks aren't portable across zones).</li>
+      </ul>
+      <div class="resolution-box"><p class="sub">Resolution</p><p>Use a StorageClass with <code>volumeBindingMode: WaitForFirstConsumer</code> so the disk is provisioned in the same zone the scheduler actually picks, instead of provisioning immediately and hoping.</p></div>
+      <div class="ticket-tags"><span class="tag violet">storage</span></div>
+    </div>
+  </div>
+<div class="ticket" data-tags="kubernetes" data-sev="1">
+    <div class="ticket-head"><span class="ticket-id">K8S-106</span><span class="sev-badge s1">SEV-1</span><span class="ticket-q">Traffic to a Service returns intermittent 502s through the ingress. Where do you look?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <p class="sub">Diagnose</p>
+      <ul>
+        <li>Confirm <code>kubectl get endpoints &lt;svc&gt;</code> lists healthy pod IPs — a Service with a correct selector but zero endpoints is invisible traffic-wise.</li>
+        <li>Check the readiness probe: a pod can be Running but not Ready, and Ready is what gates Service endpoint membership.</li>
+        <li>Check ingress controller logs for upstream connection resets — often a mismatch between the app's actual listening port and the Service's <code>targetPort</code>.</li>
+        <li>Intermittent (not constant) 502s during deploys usually mean pods are removed from the endpoint list <em>after</em> traffic stops routing, not before — a missing <code>preStop</code> hook / graceful shutdown gap.</li>
+      </ul>
+      <div class="resolution-box"><p class="sub">Resolution</p><p>Add a <code>preStop</code> sleep (or handle SIGTERM) so the pod keeps serving briefly while it's deregistered from the Service/ingress, and tune <code>terminationGracePeriodSeconds</code>. This is the single most common cause of "502s only during deploys."</p></div>
+      <div class="pitfall-box"><p class="sub">Pitfall</p><p>Blaming the ingress controller first. In practice it's almost always readiness/endpoint timing, not the controller itself.</p></div>
+      <div class="ticket-tags"><span class="tag blue">networking</span><span class="tag red">troubleshooting</span></div>
+    </div>
+  </div>
+<div class="ticket" data-tags="kubernetes" data-sev="2">
+    <div class="ticket-head"><span class="ticket-id">K8S-107</span><span class="sev-badge s2">SEV-2</span><span class="ticket-q">Two pods in different namespaces can't reach each other after a NetworkPolicy rollout.</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <p class="sub">Diagnose</p>
+      <ul>
+        <li>NetworkPolicies are <strong>additive and default-deny-once-selected</strong>: the moment any policy selects a pod, all traffic not explicitly allowed is denied.</li>
+        <li>Check both directions — ingress policy on the destination pod <em>and</em> egress policy on the source pod, both must allow the flow (if egress policies exist at all).</li>
+        <li>Cross-namespace traffic needs a <code>namespaceSelector</code> in the policy, not just a <code>podSelector</code>.</li>
+      </ul>
+      <div class="resolution-box"><p class="sub">Resolution</p><p>Add an explicit allow rule with both <code>podSelector</code> and <code>namespaceSelector</code> (with a namespace label) for the calling service, and verify with a temporary <code>kubectl run</code> debug pod plus <code>curl</code>/<code>nc</code> rather than guessing from YAML alone.</p></div>
+      <div class="ticket-tags"><span class="tag blue">networking</span><span class="tag red">security</span></div>
+    </div>
+  </div>
+<div class="ticket" data-tags="kubernetes" data-sev="2">
+    <div class="ticket-head"><span class="ticket-id">K8S-108</span><span class="sev-badge s2">SEV-2</span><span class="ticket-q">A CI service account gets <code>Forbidden: User cannot patch deployments</code>. Fix it the right way.</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <p class="sub">Diagnose</p>
+      <ul>
+        <li><code>kubectl auth can-i patch deployments --as=system:serviceaccount:ci:deployer -n prod</code> reproduces the exact check.</li>
+        <li>Inspect the bound Role/ClusterRole and RoleBinding — missing verb, wrong resource, or bound in the wrong namespace.</li>
+      </ul>
+      <div class="resolution-box"><p class="sub">Resolution</p><p>Grant least privilege with a namespaced <code>Role</code> + <code>RoleBinding</code> scoped to exactly the verbs needed (<code>get, list, patch</code> on <code>deployments</code>), not a blanket <code>ClusterRoleBinding</code> to <code>cluster-admin</code> just to unblock the pipeline.</p></div>
+      <div class="pitfall-box"><p class="sub">Pitfall</p><p>"Just give it cluster-admin" is the answer that fails you in a security-conscious interview. Always narrate the least-privilege alternative even under time pressure.</p></div>
+      <div class="ticket-tags"><span class="tag red">security</span><span class="tag blue">rbac</span></div>
+    </div>
+  </div>
+<div class="ticket" data-tags="kubernetes" data-sev="3">
+    <div class="ticket-head"><span class="ticket-id">K8S-109</span><span class="sev-badge s3">SEV-3</span><span class="ticket-q">A <code>helm upgrade</code> went out broken. How do you recover, and how could it have been caught earlier?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <p class="sub">Diagnose</p>
+      <ul>
+        <li><code>helm history &lt;release&gt;</code> to see revisions, <code>helm rollback &lt;release&gt; &lt;revision&gt;</code> to revert immediately.</li>
+        <li>Post-recovery: <code>helm diff upgrade</code> (plugin) or <code>--dry-run --debug</code> in CI before every real upgrade to preview the rendered manifest diff.</li>
+      </ul>
+      <div class="resolution-box"><p class="sub">Resolution</p><p>Roll back first, root-cause second — restoring service takes priority over understanding why in a live incident. Then add a CI gate: template-render + <code>kubeval</code>/<code>conftest</code> policy check + canary/staged rollout (Argo Rollouts or a manual weighted step) before full production.</p></div>
+      <div class="ticket-tags"><span class="tag violet">helm</span><span class="tag green">deployment</span></div>
+    </div>
+  </div>
+<div class="ticket" data-tags="kubernetes" data-sev="3">
+    <div class="ticket-head"><span class="ticket-id">K8S-110</span><span class="sev-badge s3">SEV-3</span><span class="ticket-q">How do you upgrade a production AKS cluster's Kubernetes version with zero downtime?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <p class="sub">Diagnose &amp; approach</p>
+      <ul>
+        <li>Upgrade control plane first (managed by Azure for AKS), then node pools — never skip more than one minor version at a time.</li>
+        <li>Use a <strong>surge upgrade</strong> setting (<code>maxSurge</code>) so AKS adds new nodes on the target version before draining old ones, instead of upgrading in place.</li>
+        <li>Confirm PodDisruptionBudgets exist for every critical workload so the drain respects minimum availability.</li>
+      </ul>
+      <div class="resolution-box"><p class="sub">Resolution</p><p>Blue/green the node pool: create a new node pool on the target version, cordon+drain the old one gradually, delete it once traffic has fully shifted. This avoids any in-place node reboot risk entirely and gives an instant rollback path (just stop draining).</p></div>
+      <div class="ticket-tags"><span class="tag violet">cluster-admin</span><span class="tag green">production</span></div>
+    </div>
+  </div>
+<div class="ticket" data-tags="kubernetes" data-sev="2">
+    <div class="ticket-head"><span class="ticket-id">K8S-111</span><span class="sev-badge s2">SEV-2</span><span class="ticket-q">When would you choose a StatefulSet over a Deployment, and what breaks if you get it wrong?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <p class="sub">Answer</p>
+      <ul>
+        <li><strong>Deployment</strong>: identical, interchangeable, stateless replicas — pod identity doesn't matter, any replica can serve any request.</li>
+        <li><strong>StatefulSet</strong>: stable network identity (<code>pod-0</code>, <code>pod-1</code>...), stable per-pod storage (PVC follows the pod on reschedule), ordered start/stop — needed for databases, Kafka, etcd-like systems.</li>
+      </ul>
+      <div class="pitfall-box"><p class="sub">Pitfall</p><p>Running a clustered database as a plain Deployment with a shared PVC: on rescheduling, two pods can mount (or fight over) the same volume, or lose their identity, corrupting cluster state. This is a favorite "why is this wrong" whiteboard question.</p></div>
+      <div class="ticket-tags"><span class="tag violet">workloads</span></div>
+    </div>
+  </div>
+<div class="ticket" data-tags="kubernetes" data-sev="2">
+    <div class="ticket-head"><span class="ticket-id">K8S-112</span><span class="sev-badge s2">SEV-2</span><span class="ticket-q">Nodes are running hot and you suspect noisy-neighbor pods. How do you confirm and contain it?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <p class="sub">Diagnose</p>
+      <ul>
+        <li><code>kubectl top pods --all-namespaces --sort-by=cpu</code> for a quick view; Grafana/Prometheus for historical confirmation.</li>
+        <li>Check whether offending pods have <code>limits</code> set at all — without limits a pod can consume all available node CPU/memory.</li>
+      </ul>
+      <div class="resolution-box"><p class="sub">Resolution</p><p>Enforce <code>ResourceQuota</code> at the namespace level and <code>LimitRange</code> for default requests/limits so no team can omit them; consider taints/tolerations or separate node pools to isolate genuinely bursty workloads from latency-sensitive ones.</p></div>
+      <div class="ticket-tags"><span class="tag violet">cluster-admin</span><span class="tag amber">capacity</span></div>
+    </div>
+  </div>
+<div class="ticket" data-tags="kubernetes" data-sev="1">
+    <div class="ticket-head"><span class="ticket-id">K8S-113</span><span class="sev-badge s1">SEV-1</span><span class="ticket-q">etcd is corrupted / the control plane is unresponsive. What's the recovery plan?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <p class="sub">Approach</p>
+      <ul>
+        <li>On managed AKS, the control plane (including etcd) is Azure-operated — your job is opening a support case and failing over workloads, not restoring etcd yourself.</li>
+        <li>For self-managed clusters: etcd should have scheduled snapshots (<code>etcdctl snapshot save</code>); restore replaces the data directory on each member and requires a coordinated cluster restart.</li>
+      </ul>
+      <div class="resolution-box"><p class="sub">Resolution</p><p>This question is really testing whether you know etcd <em>is</em> the cluster's single source of truth, so its backup cadence and restore drill needs to be tested regularly, not just configured and forgotten — and that on AKS this is Microsoft's responsibility under the shared responsibility model.</p></div>
+      <div class="ticket-tags"><span class="tag violet">cluster-admin</span><span class="tag red">disaster-recovery</span></div>
+    </div>
+  </div>
+<div class="ticket" data-tags="kubernetes" data-sev="3">
+    <div class="ticket-head"><span class="ticket-id">K8S-114</span><span class="sev-badge s3">SEV-3</span><span class="ticket-q">How do you secure a production cluster end to end — give me the layers.</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <p class="sub">Answer — layer by layer</p>
+      <ul>
+        <li><strong>Cluster access:</strong> Entra ID integration for <code>kubectl</code> auth, RBAC with least privilege, no shared static kubeconfigs.</li>
+        <li><strong>Workload identity:</strong> Azure AD Workload Identity / Managed Identity instead of embedding cloud credentials as Secrets.</li>
+        <li><strong>Network:</strong> default-deny NetworkPolicies, private cluster (no public API server endpoint) where possible.</li>
+        <li><strong>Supply chain:</strong> image scanning in CI, signed images, admission control (e.g. Gatekeeper/Kyverno) to block unscanned or non-compliant images.</li>
+        <li><strong>Runtime:</strong> Pod Security Admission (restricted profile), read-only root filesystem, non-root users, dropped Linux capabilities.</li>
+        <li><strong>Secrets:</strong> external secret store (Key Vault via CSI driver) instead of raw Kubernetes Secrets at rest.</li>
+      </ul>
+      <div class="ticket-tags"><span class="tag red">security</span><span class="tag green">production</span></div>
+    </div>
+  </div>
+<h3 class="bank-subhead" data-group="cicd"><span class="dot" style="background:var(--azure);"></span>CI/CD & Git</h3>
+<div class="ticket" data-tags="cicd" data-sev="1">
+    <div class="ticket-head"><span class="ticket-id">CI-201</span><span class="sev-badge s1">SEV-1</span><span class="ticket-q">A pipeline that worked yesterday fails today with no code changes. First three things you check?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <ul>
+        <li>Runner/agent health — did the runner pool change, get drained, or hit a version bump?</li>
+        <li>External dependency drift — base image, package registry, or a floating tag (<code>:latest</code>) that moved underneath you.</li>
+        <li>Pipeline/config changes merged by someone else, or a CI/CD variable that expired (token, secret rotation).</li>
+      </ul>
+      <div class="resolution-box"><p class="sub">Resolution</p><p>Pin versions everywhere — base images by digest, tool versions explicitly — so "nothing changed" is actually true and the pipeline is reproducible.</p></div>
+      <div class="ticket-tags"><span class="tag blue">pipeline</span><span class="tag red">troubleshooting</span></div>
+    </div>
+  </div>
+<div class="ticket" data-tags="cicd" data-sev="2">
+    <div class="ticket-head"><span class="ticket-id">CI-202</span><span class="sev-badge s2">SEV-2</span><span class="ticket-q">Design a pipeline that deploys to prod only after manual approval, but dev/staging are fully automatic. How?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <div class="snippet"><span class="c"># .gitlab-ci.yml (excerpt)</span>
+deploy_prod:
+  stage: deploy
+  environment:
+    name: production
+    url: https://app.example.com
+  <span class="k">when</span>: manual
+  rules:
+    - <span class="k">if</span>: <span class="s">'$CI_COMMIT_BRANCH == "main"'</span>
+  needs: [<span class="s">"deploy_staging"</span>]</div>
+      <p>Combine <code>when: manual</code> with GitLab <strong>protected environments</strong> so only specific users/groups can click "deploy," plus branch rules so it can't fire from a feature branch.</p>
+      <div class="ticket-tags"><span class="tag blue">pipeline</span><span class="tag green">release</span></div>
+    </div>
+  </div>
+<div class="ticket" data-tags="cicd" data-sev="1">
+    <div class="ticket-head"><span class="ticket-id">CI-203</span><span class="sev-badge s1">SEV-1</span><span class="ticket-q">A bad deploy just went to production. What's your rollback strategy, and how fast can you execute it?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <ul>
+        <li>Fastest: re-run the <em>previous successful</em> pipeline's deploy job — the artifact/image already exists, no rebuild needed.</li>
+        <li>For Kubernetes: <code>kubectl rollout undo</code> or <code>helm rollback</code> as an even faster path if the pipeline re-run is slow.</li>
+        <li>For infra/config changes: revert the commit (not just redeploy old code) so the repo stays the single source of truth — avoids future drift between "what's deployed" and "what's in Git."</li>
+      </ul>
+      <div class="resolution-box"><p class="sub">Resolution</p><p>State a target: "rollback executes in under 5 minutes because we redeploy a known-good, already-built artifact rather than rebuilding." That specific, measurable answer is what separates senior from mid-level here.</p></div>
+      <div class="ticket-tags"><span class="tag green">release</span><span class="tag red">incident</span></div>
+    </div>
+  </div>
+<div class="ticket" data-tags="cicd" data-sev="2">
+    <div class="ticket-head"><span class="ticket-id">CI-204</span><span class="sev-badge s2">SEV-2</span><span class="ticket-q">Pipelines are slow — a build that used to take 4 minutes now takes 20. How do you speed it up?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <ul>
+        <li>Enable/verify layer caching (Docker build cache, GitLab <code>cache:</code> keyed by lockfile hash) — most slowdowns are cache invalidation, not raw compute.</li>
+        <li>Parallelize independent jobs (test splitting/matrix) instead of one long serial stage.</li>
+        <li>Check runner autoscaling — are jobs queued waiting for an available runner rather than actually running slow?</li>
+      </ul>
+      <div class="ticket-tags"><span class="tag blue">pipeline</span><span class="tag amber">performance</span></div>
+    </div>
+  </div>
+<div class="ticket" data-tags="cicd" data-sev="2">
+    <div class="ticket-head"><span class="ticket-id">CI-205</span><span class="sev-badge s2">SEV-2</span><span class="ticket-q">Two engineers force-pushed over each other's work on a shared branch. How do you prevent this?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <ul>
+        <li>Branch protection: disallow force-push and direct commits to <code>main</code>/<code>release/*</code>.</li>
+        <li>Require merge requests with at least one approval and a passing pipeline before merge (merge trains for high-contention repos).</li>
+      </ul>
+      <div class="ticket-tags"><span class="tag blue">git</span><span class="tag green">process</span></div>
+    </div>
+  </div>
+<div class="ticket" data-tags="cicd" data-sev="3">
+    <div class="ticket-head"><span class="ticket-id">CI-206</span><span class="sev-badge s3">SEV-3</span><span class="ticket-q">Explain GitLab CI/CD variables and secret handling — how do you avoid leaking a secret in logs?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <ul>
+        <li>Mark sensitive CI/CD variables as <strong>Protected</strong> (only exposed on protected branches/tags) and <strong>Masked</strong> (redacted from job logs).</li>
+        <li>Prefer external secret stores (Key Vault, HashiCorp Vault) with short-lived tokens over long-lived CI variables where possible.</li>
+        <li>Never <code>echo</code> a variable, avoid <code>set -x</code> in scripts that touch secrets, and treat any accidental log exposure as a rotation event, not just a log cleanup.</li>
+      </ul>
+      <div class="ticket-tags"><span class="tag red">security</span><span class="tag blue">pipeline</span></div>
+    </div>
+  </div>
+<div class="ticket" data-tags="cicd" data-sev="2">
+    <div class="ticket-head"><span class="ticket-id">CI-207</span><span class="sev-badge s2">SEV-2</span><span class="ticket-q">You need the same pipeline logic reused across 30 microservice repos without copy-pasting YAML. How?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <p>Centralize with GitLab CI/CD <strong>includes</strong> (<code>include: project:</code>) pointing at a shared templates repo, parameterized with variables per service. Update the template once, every consuming pipeline picks it up on next run — versus 30 repos drifting independently.</p>
+      <div class="ticket-tags"><span class="tag blue">pipeline</span><span class="tag green">scale</span></div>
+    </div>
+  </div>
+<div class="ticket" data-tags="cicd" data-sev="1">
+    <div class="ticket-head"><span class="ticket-id">CI-208</span><span class="sev-badge s1">SEV-1</span><span class="ticket-q">Merge conflict on a critical hotfix branch, production is down, you need this merged in the next 5 minutes.</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <p>Stay calm and don't shortcut safety: pull latest target branch, resolve conflicts locally with full context of both changes (not blind "accept theirs"), run the fast/critical subset of tests locally if the full pipeline is too slow, push, and let CI gate the merge. If genuinely blocked by a slow pipeline, use a documented emergency-deploy process (still logged, still reviewed after the fact) rather than disabling checks silently — traceability matters even in a fire.</p>
+      <div class="ticket-tags"><span class="tag green">process</span><span class="tag red">incident</span></div>
+    </div>
+  </div>
+<div class="ticket" data-tags="cicd" data-sev="3">
+    <div class="ticket-head"><span class="ticket-id">CI-209</span><span class="sev-badge s3">SEV-3</span><span class="ticket-q">What's the difference between continuous delivery and continuous deployment, and which would you recommend here?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <p><strong>Continuous delivery</strong>: every change is automatically built, tested, and made release-ready, but a human decides when it actually ships (manual gate to prod). <strong>Continuous deployment</strong>: every change that passes the pipeline goes live automatically, no human gate. Recommendation depends on blast radius and rollback speed — teams with strong automated testing, feature flags, and fast rollback can safely run continuous deployment; regulated or high-risk-change environments usually keep a manual approval step for delivery instead.</p>
+      <div class="ticket-tags"><span class="tag green">process</span></div>
+    </div>
+  </div>
+<div class="ticket" data-tags="cicd" data-sev="2">
+    <div class="ticket-head"><span class="ticket-id">CI-210</span><span class="sev-badge s2">SEV-2</span><span class="ticket-q">A GitLab runner has intermittent network failures pulling dependencies mid-pipeline. Long-term fix?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <p>Add retry logic for network-flaky steps (GitLab supports <code>retry:</code> per job), but the durable fix is a local artifact/package proxy (e.g. a pull-through cache for npm/pip/Maven, or ACR as a pull-through cache for base images) so builds don't depend on the public internet's availability at all.</p>
+      <div class="ticket-tags"><span class="tag blue">pipeline</span><span class="tag amber">reliability</span></div>
+    </div>
+  </div>
+<div class="ticket" data-tags="cicd" data-sev="2">
+    <div class="ticket-head"><span class="ticket-id">CI-211</span><span class="sev-badge s2">SEV-2</span><span class="ticket-q">How do you version and promote a build artifact across dev → staging → prod without rebuilding it each time?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <p>Build once, tag with an immutable identifier (commit SHA or semantic version + SHA), push to a registry, then each environment's deploy job references that exact tag/digest. Promotion between environments becomes "point staging's deployment at the same digest that passed dev," never a rebuild — guaranteeing what you tested is exactly what ships.</p>
+      <div class="ticket-tags"><span class="tag green">release</span></div>
+    </div>
+  </div>
+<h3 class="bank-subhead" data-group="iac"><span class="dot" style="background:var(--terraform);"></span>Terraform & Ansible</h3>
+<div class="ticket" data-tags="iac" data-sev="1">
+    <div class="ticket-head"><span class="ticket-id">IAC-301</span><span class="sev-badge s1">SEV-1</span><span class="ticket-q">Two engineers ran <code>terraform apply</code> at the same time and the state file is now corrupted. What happened, and how do you prevent it?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <p>Without a remote backend + locking, concurrent applies can both read the same state, make conflicting writes, and the last write wins — silently dropping the other's changes or leaving orphaned resources. Fix going forward: remote state in Azure Storage with native locking, and force all applies through CI/CD (no local applies against shared state) so there's only ever one writer.</p>
+      <div class="resolution-box"><p class="sub">Recovery</p><p>Terraform Storage backend keeps state <strong>versioning</strong> — restore the last known-good version from blob snapshot history, then reconcile with a fresh <code>plan</code> to see what's actually drifted before touching anything.</p></div>
+      <div class="ticket-tags"><span class="tag violet">state</span><span class="tag red">incident</span></div>
+    </div>
+  </div>
+<div class="ticket" data-tags="iac" data-sev="2">
+    <div class="ticket-head"><span class="ticket-id">IAC-302</span><span class="sev-badge s2">SEV-2</span><span class="ticket-q"><code>terraform plan</code> wants to destroy and recreate a production database. Nothing in the code looks like it should change that. Why?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <p>Classic causes: a change to an immutable attribute (some arguments force replacement, not update-in-place — check the provider docs for <code>ForceNew</code>/"requires replacement"), a provider version bump that changed a default, or someone edited the resource out-of-band so Terraform's plan is "correcting" drift in the most destructive way possible.</p>
+      <div class="resolution-box"><p class="sub">Resolution</p><p>Never trust a destructive plan blindly on stateful resources — read the plan's "forces replacement" reason line by line, and for genuinely risky resources use <code>lifecycle { prevent_destroy = true }</code> as a guardrail.</p></div>
+      <div class="pitfall-box"><p class="sub">Pitfall</p><p>Running <code>apply</code> without reading the plan output in a live interview scenario is an instant red flag — always narrate "I'd read the plan first."</p></div>
+      <div class="ticket-tags"><span class="tag violet">terraform</span><span class="tag red">troubleshooting</span></div>
+    </div>
+  </div>
+<div class="ticket" data-tags="iac" data-sev="2">
+    <div class="ticket-head"><span class="ticket-id">IAC-303</span><span class="sev-badge s2">SEV-2</span><span class="ticket-q">How do you structure Terraform for dev/staging/prod — workspaces, or separate state per environment?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <p>Prefer <strong>separate state files per environment</strong> (via separate directories/backends, or a module + tfvars per env) over Terraform workspaces for prod-grade separation — workspaces share the same backend config and code path, which makes it too easy for a mistake in one workspace to bleed into another. Reusable modules + per-environment variable files give the same DRY-ness with a harder blast-radius boundary.</p>
+      <div class="ticket-tags"><span class="tag violet">terraform</span><span class="tag green">structure</span></div>
+    </div>
+  </div>
+<div class="ticket" data-tags="iac" data-sev="2">
+    <div class="ticket-head"><span class="ticket-id">IAC-304</span><span class="sev-badge s2">SEV-2</span><span class="ticket-q">A secret (client secret / connection string) got committed into a Terraform file. What now?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <ul>
+        <li>Rotate the secret immediately — removing it from Git history does <em>not</em> undo exposure, treat it as compromised.</li>
+        <li>Purge it from Git history (<code>git filter-repo</code> / BFG) as a secondary cleanup step, not the primary fix.</li>
+        <li>Long-term: pull secrets from Key Vault via a data source at plan/apply time, add pre-commit secret scanning, and mark sensitive Terraform variables with <code>sensitive = true</code> so they're redacted from CLI/plan output.</li>
+      </ul>
+      <div class="ticket-tags"><span class="tag red">security</span><span class="tag violet">terraform</span></div>
+    </div>
+  </div>
+<div class="ticket" data-tags="iac" data-sev="3">
+    <div class="ticket-head"><span class="ticket-id">IAC-305</span><span class="sev-badge s3">SEV-3</span><span class="ticket-q">Write the shape of a reusable Terraform module for an AKS cluster. What goes in, what comes out?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <div class="snippet"><span class="c"># modules/aks/variables.tf</span>
+variable <span class="s">"cluster_name"</span> { type = string }
+variable <span class="s">"node_count"</span>   { type = number, default = 3 }
+variable <span class="s">"vnet_subnet_id"</span> { type = string }
+
+<span class="c"># modules/aks/outputs.tf</span>
+output <span class="s">"cluster_id"</span>      { value = azurerm_kubernetes_cluster.this.id }
+output <span class="s">"kube_config"</span>     { value = azurerm_kubernetes_cluster.this.kube_config_raw, sensitive = true }
+output <span class="s">"identity_principal_id"</span> { value = azurerm_kubernetes_cluster.this.identity[0].principal_id }</div>
+      <p>Inputs are the things that legitimately vary per environment; outputs are what other modules (networking, IAM role assignments) need to wire up next — this is what makes modules composable instead of copy-pasted.</p>
+      <div class="ticket-tags"><span class="tag violet">terraform</span><span class="tag blue">modules</span></div>
+    </div>
+  </div>
+<div class="ticket" data-tags="iac" data-sev="2">
+    <div class="ticket-head"><span class="ticket-id">IAC-306</span><span class="sev-badge s2">SEV-2</span><span class="ticket-q">An Ansible playbook run is not idempotent — running it twice changes things the second time too. How do you fix it?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <p>Usually caused by using <code>shell</code>/<code>command</code> modules for tasks that have a proper idempotent module (e.g. <code>shell: apt-get install nginx</code> instead of the <code>apt</code> module, which checks state first). Fix: use resource-oriented modules wherever they exist, and for genuine shell steps add <code>creates:</code>/<code>changed_when:</code> conditions so Ansible can correctly report "no change needed."</p>
+      <div class="ticket-tags"><span class="tag green">ansible</span></div>
+    </div>
+  </div>
+<div class="ticket" data-tags="iac" data-sev="2">
+    <div class="ticket-head"><span class="ticket-id">IAC-307</span><span class="sev-badge s2">SEV-2</span><span class="ticket-q">Terraform apply is taking 40 minutes for a plan with 15 resources. What would you investigate?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <ul>
+        <li>Cloud API rate limiting/throttling on the provider — check for 429s in verbose (<code>TF_LOG=DEBUG</code>) output.</li>
+        <li>Resources with genuinely slow provisioning (e.g. AKS cluster creation, VPN gateways) vs. resources stuck due to a dependency misconfiguration.</li>
+        <li>Unnecessary serialization — resources that could apply in parallel but are chained by an implicit dependency (e.g. referencing an unrelated attribute just to force ordering).</li>
+      </ul>
+      <div class="ticket-tags"><span class="tag violet">terraform</span><span class="tag amber">performance</span></div>
+    </div>
+  </div>
+<div class="ticket" data-tags="iac" data-sev="1">
+    <div class="ticket-head"><span class="ticket-id">IAC-308</span><span class="sev-badge s1">SEV-1</span><span class="ticket-q">You need to bring an existing, manually-created production VNet under Terraform management without downtime. Approach?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <p>Write the Terraform resource block matching the existing resource's configuration, then <code>terraform import</code> its Azure resource ID into state, and immediately run <code>plan</code> — a clean "no changes" plan confirms your code accurately matches reality. Iterate on the code (not the live resource) until the plan is empty before ever running <code>apply</code>, so the first real apply makes zero changes.</p>
+      <div class="ticket-tags"><span class="tag violet">terraform</span><span class="tag blue">migration</span></div>
+    </div>
+  </div>
+<div class="ticket" data-tags="iac" data-sev="2">
+    <div class="ticket-head"><span class="ticket-id">IAC-309</span><span class="sev-badge s2">SEV-2</span><span class="ticket-q">How do you test infrastructure code before it ever reaches production?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <ul>
+        <li><code>terraform validate</code> + <code>fmt -check</code> in CI for syntax/style.</li>
+        <li>Static policy checks (<code>tfsec</code>, <code>checkov</code>, or Sentinel/OPA) to catch insecure configs (open NSGs, public storage) before apply.</li>
+        <li><code>terraform plan</code> posted as a CI comment on the merge request for human review — the diff <em>is</em> the review.</li>
+        <li>Apply to a real short-lived sandbox/staging subscription for higher-risk modules before prod.</li>
+      </ul>
+      <div class="ticket-tags"><span class="tag violet">terraform</span><span class="tag red">devsecops</span></div>
+    </div>
+  </div>
+<div class="ticket" data-tags="iac" data-sev="3">
+    <div class="ticket-head"><span class="ticket-id">IAC-310</span><span class="sev-badge s3">SEV-3</span><span class="ticket-q">When would you choose Bicep over Terraform for Azure, given both are in scope for this role?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <p><strong>Bicep</strong> is Azure-native (compiles to ARM), gets day-one support for brand-new Azure resource types, and needs no state file — Azure Resource Manager itself is the source of truth. <strong>Terraform</strong> is cloud-agnostic, has a larger module ecosystem, and is the better choice in multi-cloud or hybrid estates, or where the org has existing Terraform investment. In an Azure-only shop with a small platform team, Bicep reduces operational surface area (no state backend to manage); in a mixed-cloud org, Terraform's one tool for everything usually wins.</p>
+      <div class="ticket-tags"><span class="tag blue">azure</span><span class="tag violet">terraform</span></div>
+    </div>
+  </div>
+<h3 class="bank-subhead" data-group="monitoring"><span class="dot" style="background:var(--green);"></span>Monitoring & Incident Response</h3>
+<div class="ticket" data-tags="monitoring" data-sev="1">
+    <div class="ticket-head"><span class="ticket-id">MON-401</span><span class="sev-badge s1">SEV-1</span><span class="ticket-q">Production is down. You get paged. What are your first five minutes?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <ul>
+        <li>Acknowledge the page (stop it re-escalating) and open the relevant dashboard — don't start guessing from memory.</li>
+        <li>Confirm blast radius: one region, all regions, one service, or a shared dependency (DNS, auth, database)?</li>
+        <li>Declare an incident with a severity and, if the org has one, an incident commander role — communication starts now, not after you've found root cause.</li>
+        <li>Look for what changed recently: deploys, config, feature flags, infra changes in the last few hours — most incidents trace back to a recent change.</li>
+      </ul>
+      <div class="resolution-box"><p class="sub">Resolution</p><p>Mitigate first: rollback, feature-flag off, or scale up/failover — restore service before you fully understand why. Root cause analysis happens after the fire is out.</p></div>
+      <div class="ticket-tags"><span class="tag red">incident</span><span class="tag green">process</span></div>
+    </div>
+  </div>
+<div class="ticket" data-tags="monitoring" data-sev="2">
+    <div class="ticket-head"><span class="ticket-id">MON-402</span><span class="sev-badge s2">SEV-2</span><span class="ticket-q">Your team is getting paged 40 times a week and burning out. How do you fix alerting, not just tolerance for pages?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <ul>
+        <li>Audit every alert: does it map to actual user-facing impact (SLO burn rate), or is it a raw resource threshold (CPU &gt; 80%) that's frequently noisy and not actionable?</li>
+        <li>Convert "page-worthy" to symptom-based alerts (error rate, latency, availability) and demote cause-based signals (disk 70% full) to tickets/dashboards, not pages.</li>
+        <li>Add alert grouping/deduplication and sensible for-durations so one blip doesn't fire five pages.</li>
+      </ul>
+      <div class="resolution-box"><p class="sub">Resolution</p><p>Every alert should be actionable and tied to user impact. If an alert fires and the response is "nothing to do," it shouldn't be a page.</p></div>
+      <div class="ticket-tags"><span class="tag green">observability</span><span class="tag amber">on-call</span></div>
+    </div>
+  </div>
+<div class="ticket" data-tags="monitoring" data-sev="3">
+    <div class="ticket-head"><span class="ticket-id">MON-403</span><span class="sev-badge s3">SEV-3</span><span class="ticket-q">Define SLI, SLO, and error budget, and how they change your deploy decisions.</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <ul>
+        <li><strong>SLI</strong> (indicator): a measured metric, e.g. "% of requests under 300ms."</li>
+        <li><strong>SLO</strong> (objective): a target for that SLI, e.g. "99.9% of requests under 300ms over 30 days."</li>
+        <li><strong>Error budget</strong>: the allowed 0.1% — once it's spent, the team's priority shifts from shipping features to reliability work, and risky deploys get paused or gated behind extra review.</li>
+      </ul>
+      <div class="ticket-tags"><span class="tag green">observability</span></div>
+    </div>
+  </div>
+<div class="ticket" data-tags="monitoring" data-sev="1">
+    <div class="ticket-head"><span class="ticket-id">MON-404</span><span class="sev-badge s1">SEV-1</span><span class="ticket-q">Prometheus itself is down / not scraping — you're flying blind during an incident. What do you do?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <p>Fall back to secondary signals: cloud provider platform metrics (Azure Monitor), application logs directly, or a synthetic uptime check that's independent of your primary stack. This is also the argument for why monitoring infrastructure itself needs redundancy/HA and shouldn't share a failure domain with what it's monitoring — e.g. don't run your only Prometheus inside the same cluster it's the sole observer of, without a secondary path.</p>
+      <div class="ticket-tags"><span class="tag red">incident</span><span class="tag green">observability</span></div>
+    </div>
+  </div>
+<div class="ticket" data-tags="monitoring" data-sev="2">
+    <div class="ticket-head"><span class="ticket-id">MON-405</span><span class="sev-badge s2">SEV-2</span><span class="ticket-q">Walk me through writing a blameless postmortem after a major outage.</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <ul>
+        <li><strong>Timeline</strong> of objective facts: when it started, when detected, when mitigated, when resolved — timestamps, not opinions.</li>
+        <li><strong>Impact</strong>: quantify it (users affected, revenue, SLO burn) rather than "it was bad."</li>
+        <li><strong>Root cause</strong> via 5 Whys, focused on systems and process gaps, never on naming/blaming an individual.</li>
+        <li><strong>Action items</strong>: specific, owned, dated, and tracked to closure — a postmortem with no completed action items is theater.</li>
+      </ul>
+      <div class="callout tip"><div class="ico">i</div><p><strong>Language matters:</strong> "the deploy process allowed an unvalidated config to reach prod," not "Dave pushed bad config." Interviewers listen for this framing specifically.</p></div>
+      <div class="ticket-tags"><span class="tag amber">rca</span><span class="tag green">process</span></div>
+    </div>
+  </div>
+<div class="ticket" data-tags="monitoring" data-sev="2">
+    <div class="ticket-head"><span class="ticket-id">MON-406</span><span class="sev-badge s2">SEV-2</span><span class="ticket-q">Disk usage on a node is climbing steadily and will hit 100% in 6 hours. How do you handle it — page now or wait?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <p>This is a textbook case for a <strong>warning-level</strong> alert with a longer response window, not a page — it's predictable and not yet impacting users. Route it to a ticket/Slack channel with a clear runbook (log rotation, old artifact cleanup, or scale storage), and only escalate to a page if the trend accelerates or crosses a near-term threshold (e.g. &lt;1 hour to full).</p>
+      <div class="ticket-tags"><span class="tag green">alerting</span></div>
+    </div>
+  </div>
+<div class="ticket" data-tags="monitoring" data-sev="3">
+    <div class="ticket-head"><span class="ticket-id">MON-407</span><span class="sev-badge s3">SEV-3</span><span class="ticket-q">Compare Prometheus+Grafana vs. Datadog vs. ELK for a mid-size platform team. How would you choose?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <div class="tbl-wrap"><table class="cmp">
+        <tr><th>Stack</th><th>Model</th><th>Strength</th><th>Trade-off</th></tr>
+        <tr><td>Prometheus + Grafana</td><td>Self-hosted, pull-based metrics</td><td>Free, huge ecosystem, K8s-native</td><td>You own scaling/HA/storage retention</td></tr>
+        <tr><td>Datadog</td><td>Managed SaaS, agent-based</td><td>Fast setup, unified metrics/logs/traces/APM</td><td>Cost scales fast with hosts/custom metrics</td></tr>
+        <tr><td>ELK / EFK</td><td>Self-hosted or Elastic Cloud, log-centric</td><td>Best-in-class full-text log search</td><td>Not built primarily for metrics/alerting; resource-hungry at scale</td></tr>
+      </table></div>
+      <p>Answer with a decision driver, not just a table: budget and headcount to operate infra → lean Datadog; K8s-heavy with cost sensitivity and in-house platform skill → Prometheus/Grafana; log-search-heavy compliance or security use case → ELK, often alongside the metrics stack rather than instead of it.</p>
+      <div class="ticket-tags"><span class="tag green">observability</span></div>
+    </div>
+  </div>
+<div class="ticket" data-tags="monitoring" data-sev="2">
+    <div class="ticket-head"><span class="ticket-id">MON-408</span><span class="sev-badge s2">SEV-2</span><span class="ticket-q">Latency degraded slowly over two weeks, no single deploy caused it, and nobody noticed until customers complained. What failed?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <p>The alerting was threshold-based on a moving baseline that crept along with the degradation ("boiling frog" problem), or there was no SLO-based burn-rate alert at all — only "is it fully down" checks. Fix: alert on rate of change and on absolute SLO thresholds together, and review trend dashboards on a regular cadence, not only reactively.</p>
+      <div class="ticket-tags"><span class="tag green">observability</span><span class="tag amber">performance</span></div>
+    </div>
+  </div>
+<div class="ticket" data-tags="monitoring" data-sev="1">
+    <div class="ticket-head"><span class="ticket-id">MON-409</span><span class="sev-badge s1">SEV-1</span><span class="ticket-q">During an active outage, three engineers are independently trying different fixes and stepping on each other. What's wrong with the response and how do you fix it live?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <p>Missing incident command structure. Assign a single <strong>Incident Commander</strong> who coordinates and makes the final call on which mitigation to try (and in what order), a dedicated communications channel/thread for status updates, and route all changes through the IC so actions aren't taken in parallel without visibility. This is a process question as much as a technical one — seniority shows in recognizing coordination failure as the actual root cause.</p>
+      <div class="ticket-tags"><span class="tag red">incident</span><span class="tag green">process</span></div>
+    </div>
+  </div>
+<div class="ticket" data-tags="monitoring" data-sev="2">
+    <div class="ticket-head"><span class="ticket-id">MON-410</span><span class="sev-badge s2">SEV-2</span><span class="ticket-q">How do you monitor a Kubernetes cluster itself, separate from the applications running on it?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <ul>
+        <li><strong>kube-state-metrics</strong> for object-level state (deployment replica mismatches, pod phase counts, PVC status).</li>
+        <li><strong>node-exporter</strong> (DaemonSet) for host-level CPU/mem/disk/network per node.</li>
+        <li><strong>cAdvisor</strong> (built into kubelet) for per-container resource usage.</li>
+        <li>Control-plane metrics (API server latency, etcd health) — critical on self-managed clusters, mostly abstracted away on AKS.</li>
+      </ul>
+      <div class="ticket-tags"><span class="tag violet">kubernetes</span><span class="tag green">observability</span></div>
+    </div>
+  </div>
+<div class="ticket" data-tags="monitoring" data-sev="2">
+    <div class="ticket-head"><span class="ticket-id">MON-411</span><span class="sev-badge s2">SEV-2</span><span class="ticket-q">Logs from 40 microservices are unsearchable — everyone greps individual pod logs. What's your fix?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <p>Centralize: ship every container's stdout/stderr via a DaemonSet log agent (Fluent Bit) to a central store (ELK or Log Analytics), enforce <strong>structured JSON logging</strong> with a correlation/trace ID on every log line, so a single request can be followed across services with one query instead of forty separate <code>kubectl logs</code> commands.</p>
+      <div class="ticket-tags"><span class="tag green">observability</span><span class="tag violet">kubernetes</span></div>
+    </div>
+  </div>
+<div class="ticket" data-tags="monitoring" data-sev="3">
+    <div class="ticket-head"><span class="ticket-id">MON-412</span><span class="sev-badge s3">SEV-3</span><span class="ticket-q">How do you balance "move fast" with "keep things reliable" — the JD literally asks for this balance.</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <p>Error budgets are the concrete mechanism: as long as the budget isn't exhausted, teams ship freely; once it is, velocity yields to reliability work automatically, by policy rather than by argument. Pair that with progressive delivery (canary/feature flags) so "moving fast" doesn't mean "betting the whole fleet on every change" — blast radius is controlled independently of release frequency.</p>
+      <div class="ticket-tags"><span class="tag green">strategy</span></div>
+    </div>
+  </div>
+<h3 class="bank-subhead" data-group="devsecops"><span class="dot" style="background:var(--red);"></span>DevSecOps</h3>
+<div class="ticket" data-tags="devsecops" data-sev="1">
+    <div class="ticket-head"><span class="ticket-id">SEC-501</span><span class="sev-badge s1">SEV-1</span><span class="ticket-q">SCA finds a critical CVE in a transitive dependency used by 30 services. What's your rollout plan?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <ul>
+        <li>Confirm exploitability in your actual usage — not every CVE in a dependency is reachable code (a "reachability" check saves panic-fixing unaffected paths).</li>
+        <li>Prioritize by exposure: internet-facing services patch first, internal batch jobs later, on a defined timeline (e.g. critical = 24-48h).</li>
+        <li>Automate the bump via a shared base image or lockfile bot (Dependabot/Renovate) across all 30 repos instead of 30 manual PRs.</li>
+      </ul>
+      <div class="ticket-tags"><span class="tag red">vulnerability</span><span class="tag blue">pipeline</span></div>
+    </div>
+  </div>
+<div class="ticket" data-tags="devsecops" data-sev="2">
+    <div class="ticket-head"><span class="ticket-id">SEC-502</span><span class="sev-badge s2">SEV-2</span><span class="ticket-q">Developers are complaining the security scan gate blocks every single build with low-severity findings. How do you fix the process without weakening security?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <p>Tune the gate to fail the build only on severity thresholds that matter (e.g. Critical/High block, Medium/Low report-only with a tracked backlog), and support suppression with an expiring, reviewed exception (not a silent ignore) for accepted-risk findings. A gate that blocks on everything trains developers to ignore it entirely — that's the real security failure.</p>
+      <div class="ticket-tags"><span class="tag red">pipeline</span><span class="tag green">process</span></div>
+    </div>
+  </div>
+<div class="ticket" data-tags="devsecops" data-sev="1">
+    <div class="ticket-head"><span class="ticket-id">SEC-503</span><span class="sev-badge s1">SEV-1</span><span class="ticket-q">An engineer accidentally pushed AWS/Azure credentials to a public repo. Walk through your response.</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <ul>
+        <li><strong>Rotate/revoke the credential immediately</strong> — assume it's compromised the second it's public, regardless of how quickly it's deleted.</li>
+        <li>Check cloud provider activity logs for any usage from unfamiliar IPs during the exposure window.</li>
+        <li>Purge from Git history as cleanup (not the primary control), and add automated secret-scanning as a pre-receive/push gate so this can't reach the remote again.</li>
+      </ul>
+      <div class="ticket-tags"><span class="tag red">incident</span><span class="tag violet">secrets</span></div>
+    </div>
+  </div>
+<div class="ticket" data-tags="devsecops" data-sev="2">
+    <div class="ticket-head"><span class="ticket-id">SEC-504</span><span class="sev-badge s2">SEV-2</span><span class="ticket-q">How do you prevent an unscanned or unsigned container image from ever reaching production, even if someone bypasses the pipeline?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <p>Pipeline gates alone are advisory — someone with cluster access can still <code>kubectl apply</code> directly. The durable control is <strong>admission control in-cluster</strong>: an OPA/Gatekeeper or Kyverno policy that rejects any pod spec referencing an image without a valid signature (cosign/Notary) or from an untrusted registry, enforced by the cluster itself, not just by CI.</p>
+      <div class="ticket-tags"><span class="tag red">supply-chain</span><span class="tag violet">kubernetes</span></div>
+    </div>
+  </div>
+<div class="ticket" data-tags="devsecops" data-sev="3">
+    <div class="ticket-head"><span class="ticket-id">SEC-505</span><span class="sev-badge s3">SEV-3</span><span class="ticket-q">What's the difference between SAST and DAST, and why do you need both?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <p><strong>SAST</strong> reads source code without executing it — fast, catches issues early, but can't see runtime behavior (misconfigured auth middleware that only fails under real request flow) and has false positives from patterns that are actually safe in context. <strong>DAST</strong> attacks a running instance like a real attacker would — catches real exploitable issues (including config/deployment mistakes SAST can't see) but runs late (needs a deployed environment) and can't point to a line of code. Mature pipelines run both at different stages.</p>
+      <div class="ticket-tags"><span class="tag red">fundamentals</span></div>
+    </div>
+  </div>
+<div class="ticket" data-tags="devsecops" data-sev="2">
+    <div class="ticket-head"><span class="ticket-id">SEC-506</span><span class="sev-badge s2">SEV-2</span><span class="ticket-q">Compliance asks for an audit trail of every production change for the last 12 months. Where does that live in your setup?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <p>Git history (who changed what code, reviewed by whom) + pipeline run logs (what was deployed, when, by which pipeline, approved by whom) + cloud activity logs (Azure Activity Log / Entra sign-in logs for who touched what resource directly) together form the trail. This is also the argument for "everything through pipelines, nothing manual" — manual portal changes are the audit gap.</p>
+      <div class="ticket-tags"><span class="tag red">compliance</span></div>
+    </div>
+  </div>
+<div class="ticket" data-tags="devsecops" data-sev="2">
+    <div class="ticket-head"><span class="ticket-id">SEC-507</span><span class="sev-badge s2">SEV-2</span><span class="ticket-q">How do you scan Infrastructure-as-Code itself for security misconfigurations before it's ever applied?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <p>Static IaC scanners (<code>tfsec</code>, <code>checkov</code>, Terrascan) run against the plan/HCL in CI — catching things like public storage buckets, open NSG rules (0.0.0.0/0), missing encryption-at-rest, or overly broad IAM roles before <code>apply</code> ever runs. Pair with a policy-as-code gate (Sentinel/OPA on the plan JSON) to hard-block specific violations rather than just warn.</p>
+      <div class="ticket-tags"><span class="tag violet">iac</span><span class="tag red">pipeline</span></div>
+    </div>
+  </div>
+<div class="ticket" data-tags="devsecops" data-sev="3">
+    <div class="ticket-head"><span class="ticket-id">SEC-508</span><span class="sev-badge s3">SEV-3</span><span class="ticket-q">Explain the "shift-left" concept to someone skeptical it's worth the friction.</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <p>Cost of fixing a vulnerability rises the later it's found — a bad pattern caught by SAST at commit time is a one-line fix by the author who just wrote it; the same issue found in production is an incident, a hotfix, possibly a breach disclosure. Shift-left isn't about adding gates for their own sake, it's about moving the same checks to the cheapest point to fix them — and pairing that with fast, low-friction tooling so it doesn't become a bottleneck itself.</p>
+      <div class="ticket-tags"><span class="tag green">strategy</span></div>
+    </div>
+  </div>
+<div class="ticket" data-tags="devsecops" data-sev="2">
+    <div class="ticket-head"><span class="ticket-id">SEC-509</span><span class="sev-badge s2">SEV-2</span><span class="ticket-q">A pentest finds a service account with far more permissions than it uses. How would your pipeline have caught this earlier?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <p>Least-privilege drift like this is best caught by periodic automated IAM access reviews (who/what has access vs. what it actually calls, using cloud-native tools like Azure Defender for Cloud's permission recommendations or AWS IAM Access Analyzer) rather than pipeline scanning alone — this is a config/identity governance gap, and the fix is scoped roles defined and reviewed as code (Terraform-managed role assignments) so grants are visible and diffable in PRs, not created ad hoc in the portal.</p>
+      <div class="ticket-tags"><span class="tag red">iam</span><span class="tag violet">governance</span></div>
+    </div>
+  </div>
+<h3 class="bank-subhead" data-group="landing-zone"><span class="dot" style="background:var(--azure);"></span>Landing Zone, Multi-Region & DR</h3>
+<div class="ticket" data-tags="landing-zone" data-sev="2">
+    <div class="ticket-head"><span class="ticket-id">LZ-601</span><span class="sev-badge s2">SEV-2</span><span class="ticket-q">A new application team wants their own subscription. What governance has to be in place before you hand it over?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <ul>
+        <li>Subscription placed under the correct management group so it inherits the right Azure Policy set (allowed regions, required tags, denied resource types) automatically.</li>
+        <li>RBAC baseline: platform team retains a break-glass/emergency access role; app team gets Contributor scoped to their resource groups, not the subscription root.</li>
+        <li>Budget/cost alert and a network connection back to the hub (peering or vWAN) provisioned via the same landing zone pipeline everyone else uses — no manual one-off setup.</li>
+      </ul>
+      <div class="ticket-tags"><span class="tag blue">governance</span></div>
+    </div>
+  </div>
+<div class="ticket" data-tags="landing-zone" data-sev="1">
+    <div class="ticket-head"><span class="ticket-id">LZ-602</span><span class="sev-badge s1">SEV-1</span><span class="ticket-q">The primary Azure region for a critical app is having a major outage right now. Walk through failover.</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <ul>
+        <li>Confirm the scope from the Azure Status page — regional vs. specific service impact.</li>
+        <li>If pre-built for active-active/warm-standby: shift traffic via Azure Front Door / Traffic Manager priority or weighted routing to the healthy region.</li>
+        <li>If backup-and-restore only: this is where RTO gets tested for real — restore from the most recent geo-redundant backup into the paired region and reconnect DNS.</li>
+        <li>Communicate status honestly against the documented RTO/RPO — this is exactly what those numbers were promised for.</li>
+      </ul>
+      <div class="resolution-box"><p class="sub">Resolution</p><p>The senior signal here is having tested this failover before it was needed — a DR plan nobody has drilled is a hypothesis, not a plan.</p></div>
+      <div class="ticket-tags"><span class="tag red">disaster-recovery</span><span class="tag amber">incident</span></div>
+    </div>
+  </div>
+<div class="ticket" data-tags="landing-zone" data-sev="2">
+    <div class="ticket-head"><span class="ticket-id">LZ-603</span><span class="sev-badge s2">SEV-2</span><span class="ticket-q">You're migrating 200 VMware VMs to Azure. Outline your approach with Azure Migrate.</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <ul>
+        <li><strong>Discover:</strong> deploy the Azure Migrate appliance in the VMware environment to inventory VMs, dependencies, and utilization data.</li>
+        <li><strong>Assess:</strong> right-size target Azure VM SKUs from actual utilization (not guesswork), estimate cost, flag readiness issues.</li>
+        <li><strong>Replicate:</strong> agentless or agent-based replication of disks to Azure, with an initial full sync then delta syncs.</li>
+        <li><strong>Test migrate:</strong> boot a copy in an isolated network to validate before cutover — never skip this step for anything business-critical.</li>
+        <li><strong>Migrate (cutover):</strong> final delta sync, shut down source, boot in Azure — wave-based (grouped by dependency, not just alphabetically) to limit blast radius per wave.</li>
+      </ul>
+      <div class="ticket-tags"><span class="tag blue">migration</span></div>
+    </div>
+  </div>
+<div class="ticket" data-tags="landing-zone" data-sev="3">
+    <div class="ticket-head"><span class="ticket-id">LZ-604</span><span class="sev-badge s3">SEV-3</span><span class="ticket-q">Difference between Azure Backup and Azure Site Recovery — when do you use which?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <p><strong>Azure Backup</strong> protects data — point-in-time recoverable snapshots for restoring lost/corrupted/deleted data, RPO measured in the backup interval (typically daily). <strong>Azure Site Recovery</strong> protects availability — continuous replication of entire VMs to another region so you can fail the whole workload over in minutes with a much tighter RPO. They're complementary, not alternatives: ASR gets you back up fast after a regional event, Backup gets you back to a clean point after corruption/ransomware/accidental deletion that ASR would faithfully replicate too.</p>
+      <div class="ticket-tags"><span class="tag blue">fundamentals</span></div>
+    </div>
+  </div>
+<div class="ticket" data-tags="landing-zone" data-sev="2">
+    <div class="ticket-head"><span class="ticket-id">LZ-605</span><span class="sev-badge s2">SEV-2</span><span class="ticket-q">Leadership wants "everything highly available" but the budget doesn't support full active-active everywhere. How do you push back constructively?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <p>Tier applications by business criticality and get an explicit, signed-off RTO/RPO per tier — not every system needs the same protection, and paying for active-active on a low-traffic internal reporting tool is wasted spend that could fund proper protection for the payment system. Present the cost curve (backup-restore → pilot light → warm standby → active-active) against actual business impact per app so the trade-off is a business decision, not a guess.</p>
+      <div class="ticket-tags"><span class="tag green">strategy</span></div>
+    </div>
+  </div>
+<div class="ticket" data-tags="landing-zone" data-sev="1">
+    <div class="ticket-head"><span class="ticket-id">LZ-606</span><span class="sev-badge s1">SEV-1</span><span class="ticket-q">A Terraform apply against the platform landing zone accidentally deleted a production management group's policy assignment. Blast radius?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <p>Because policy inherits down the management group hierarchy, removing an assignment at that level can instantly change compliance/enforcement for every subscription beneath it — potentially opening previously-blocked resource types, regions, or unencrypted storage across the whole estate. Immediate response: reapply the policy assignment (it should be in version control — reapply from Git, don't hand-recreate it), then audit what was created in the gap window using Azure Policy compliance state and Activity Log.</p>
+      <div class="ticket-tags"><span class="tag blue">governance</span><span class="tag red">incident</span></div>
+    </div>
+  </div>
+<div class="ticket" data-tags="landing-zone" data-sev="2">
+    <div class="ticket-head"><span class="ticket-id">LZ-607</span><span class="sev-badge s2">SEV-2</span><span class="ticket-q">How do you decide between a multi-subscription vs. single large subscription design?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <p>Multi-subscription is the enterprise-scale default: subscriptions are the hard boundary for RBAC, policy, and — critically — many Azure resource quotas/limits. Separating by environment (prod/non-prod) and/or business unit contains blast radius (a mistake in dev can't touch prod's subscription-level RBAC) and avoids hitting shared quota ceilings. Single subscription is only reasonable for genuinely small estates where the operational overhead of managing many subscriptions isn't yet justified.</p>
+      <div class="ticket-tags"><span class="tag blue">design</span></div>
+    </div>
+  </div>
+<div class="ticket" data-tags="landing-zone" data-sev="2">
+    <div class="ticket-head"><span class="ticket-id">LZ-608</span><span class="sev-badge s2">SEV-2</span><span class="ticket-q">Log Analytics costs have tripled in three months with no corresponding growth in workloads. Investigate.</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <p>Check ingestion volume by table/source (<code>Usage</code> solution query) — common culprits: a verbose diagnostic setting (e.g. AllLogs on a chatty resource) enabled during troubleshooting and never turned back down, a new NSG flow log or firewall log source added without a retention/sampling plan, or duplicate diagnostic settings sending the same data twice. Fix with per-table retention tuning, sampling for high-volume/low-value logs, and a cost-per-workspace alert to catch the next spike early.</p>
+      <div class="ticket-tags"><span class="tag amber">cost</span><span class="tag green">observability</span></div>
+    </div>
+  </div>
+<div class="ticket" data-tags="landing-zone" data-sev="3">
+    <div class="ticket-head"><span class="ticket-id">LZ-609</span><span class="sev-badge s3">SEV-3</span><span class="ticket-q">Define "landing zone" in one sentence you'd give a non-technical stakeholder.</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <p>A landing zone is the pre-built, pre-governed environment a new application "lands" into — networking, identity, security, and policy already wired up correctly — so teams start building on day one instead of re-solving governance from scratch every time.</p>
+      <div class="ticket-tags"><span class="tag blue">communication</span></div>
+    </div>
+  </div>
+<div class="ticket" data-tags="landing-zone" data-sev="2">
+    <div class="ticket-head"><span class="ticket-id">LZ-610</span><span class="sev-badge s2">SEV-2</span><span class="ticket-q">A DR failover test reveals the DR region's app version is three releases behind production. What process gap does that expose?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <p>DR isn't a one-time build — it needs to be part of the standard deployment pipeline (deploy to both regions, or keep DR's image/config in lockstep automatically) and tested on a schedule, not just built once and assumed to stay current. Treat "DR region deploy" as a required pipeline stage, and run failover drills (game days) regularly enough that drift like this is caught in a drill, never in a real incident.</p>
+      <div class="ticket-tags"><span class="tag red">disaster-recovery</span><span class="tag green">process</span></div>
+    </div>
+  </div>
+<h3 class="bank-subhead" data-group="networking"><span class="dot" style="background:var(--azure);"></span>Azure Networking</h3>
+<div class="ticket" data-tags="networking" data-sev="1">
+    <div class="ticket-head"><span class="ticket-id">NET-701</span><span class="sev-badge s1">SEV-1</span><span class="ticket-q">A workload in Spoke A can't reach a database in Spoke B. Both VNets are peered to the hub. Diagnose it.</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <ul>
+        <li>Peering to the hub does <strong>not</strong> transitively connect spokes — confirm there's a User Defined Route (UDR) on each spoke's subnet sending 0.0.0.0/0 (or the specific spoke CIDR) via the hub firewall's private IP as next hop.</li>
+        <li>Check the firewall's own rules (network/application rule collections) actually allow that spoke-to-spoke flow — a UDR routes traffic to the firewall, it doesn't permit it.</li>
+        <li>Check NSGs on both source and destination subnets for the specific ports.</li>
+      </ul>
+      <div class="resolution-box"><p class="sub">Resolution</p><p>Add/fix the UDR forcing spoke traffic through the hub NVA/firewall, and add an explicit allow rule on the firewall for that flow — this two-part check (routing exists + is permitted) is the core hub-spoke troubleshooting pattern.</p></div>
+      <div class="ticket-tags"><span class="tag blue">connectivity</span><span class="tag red">troubleshooting</span></div>
+    </div>
+  </div>
+<div class="ticket" data-tags="networking" data-sev="2">
+    <div class="ticket-head"><span class="ticket-id">NET-702</span><span class="sev-badge s2">SEV-2</span><span class="ticket-q">Users report intermittent slow responses only for traffic coming through the Application Gateway WAF. How do you isolate whether it's the WAF or the backend?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <ul>
+        <li>Check Application Gateway backend health probes and metrics — is latency added at the gateway hop itself, or is the backend genuinely slow and the gateway is just the entry point you happen to be measuring from?</li>
+        <li>Check WAF logs for rule evaluation overhead or false-positive blocks causing retries.</li>
+        <li>Compare gateway-to-backend latency metric vs. client-to-gateway latency to isolate the segment.</li>
+      </ul>
+      <div class="ticket-tags"><span class="tag blue">networking</span><span class="tag amber">performance</span></div>
+    </div>
+  </div>
+<div class="ticket" data-tags="networking" data-sev="2">
+    <div class="ticket-head"><span class="ticket-id">NET-703</span><span class="sev-badge s2">SEV-2</span><span class="ticket-q">A storage account was moved behind Private Link but an on-prem application can no longer resolve its hostname. Why, and how do you fix it?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <p>Private Link relies on a Private DNS Zone that resolves the storage account's public FQDN to its private IP — <strong>inside Azure</strong>. On-prem DNS servers don't automatically know about that private zone. Fix: conditional forwarder on the on-prem DNS server pointing the relevant zone (e.g. <code>privatelink.blob.core.windows.net</code>) to a DNS resolver inside the hub VNet (Azure DNS Private Resolver or a VM running as forwarder), so on-prem clients resolve to the private IP too.</p>
+      <div class="ticket-tags"><span class="tag blue">dns</span><span class="tag red">troubleshooting</span></div>
+    </div>
+  </div>
+<div class="ticket" data-tags="networking" data-sev="3">
+    <div class="ticket-head"><span class="ticket-id">NET-704</span><span class="sev-badge s3">SEV-3</span><span class="ticket-q">Explain Private Link vs. Service Endpoint — why would you choose the more complex one?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <p><strong>Service Endpoint</strong> keeps traffic on the Azure backbone and restricts a PaaS resource's firewall to specific VNet/subnets — but the resource still has a <em>public</em> IP/endpoint, just with network-level ACLs. <strong>Private Link</strong> injects a private IP for the resource directly into your VNet — no public endpoint exists for that connection at all, traffic never touches the public internet path, and it works across peered VNets, on-prem (via VPN/ExpressRoute), and even other tenants. Choose Private Link whenever "no public exposure, period" is a compliance requirement, not just "restricted by IP."</p>
+      <div class="ticket-tags"><span class="tag blue">fundamentals</span></div>
+    </div>
+  </div>
+<div class="ticket" data-tags="networking" data-sev="1">
+    <div class="ticket-head"><span class="ticket-id">NET-705</span><span class="sev-badge s1">SEV-1</span><span class="ticket-q">The ExpressRoute circuit just went down. On-prem users can't reach Azure resources. What's your immediate action and what's the durable fix?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <p>Immediate: confirm scope via Azure Service Health and the ExpressRoute circuit's provider-side status; if a Site-to-Site VPN gateway exists as backup, traffic should already be failing over automatically via BGP route priority — verify it did. If no backup path exists, that's the actual finding here. Durable fix: every production ExpressRoute circuit should have a VPN failover path (or a second circuit via a different peering location/provider for true redundancy) — a single circuit is a single point of failure, no matter how reliable the provider's SLA is.</p>
+      <div class="ticket-tags"><span class="tag red">disaster-recovery</span><span class="tag blue">connectivity</span></div>
+    </div>
+  </div>
+<div class="ticket" data-tags="networking" data-sev="2">
+    <div class="ticket-head"><span class="ticket-id">NET-706</span><span class="sev-badge s2">SEV-2</span><span class="ticket-q">How do you expose an internal API to a partner company without putting it on the public internet?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <p>Publish it as an <strong>Azure Private Link Service</strong> behind a Standard Load Balancer — the partner (with their own Azure tenant) creates a Private Endpoint in their VNet that connects to your service over the Microsoft backbone, with connection approval on your side. No public IP, no VPN/ExpressRoute needed between the two organizations, and you can revoke access instantly by rejecting/removing the connection.</p>
+      <div class="ticket-tags"><span class="tag blue">design</span><span class="tag red">security</span></div>
+    </div>
+  </div>
+<div class="ticket" data-tags="networking" data-sev="2">
+    <div class="ticket-head"><span class="ticket-id">NET-707</span><span class="sev-badge s2">SEV-2</span><span class="ticket-q">WAF is blocking a legitimate customer request as a false positive (e.g. flagged as SQL injection). How do you fix it without disabling protection broadly?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <p>Check WAF logs for the specific matched rule ID, then add a scoped exclusion (specific rule + specific request attribute/parameter, e.g. exclude a rule only for one query-string parameter known to contain SQL-like text legitimately) rather than switching the WAF to Detection-only mode or disabling the whole rule set — that would remove protection for every other request, not just this false positive.</p>
+      <div class="ticket-tags"><span class="tag red">security</span><span class="tag blue">networking</span></div>
+    </div>
+  </div>
+<div class="ticket" data-tags="networking" data-sev="3">
+    <div class="ticket-head"><span class="ticket-id">NET-708</span><span class="sev-badge s3">SEV-3</span><span class="ticket-q">Why do spokes route through a central firewall instead of each having their own NAT/firewall to the internet?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <p>Centralizing egress/ingress inspection gives one consistent policy surface, one place to see all north-south traffic logs for security monitoring, and avoids each application team configuring (and misconfiguring) their own firewall independently. The trade-off is the hub firewall becomes a shared dependency and potential bottleneck/single point of failure — mitigated by deploying it in a zone-redundant/HA SKU and sizing for aggregate spoke traffic, not per-spoke.</p>
+      <div class="ticket-tags"><span class="tag blue">design</span></div>
+    </div>
+  </div>
+<div class="ticket" data-tags="networking" data-sev="2">
+    <div class="ticket-head"><span class="ticket-id">NET-709</span><span class="sev-badge s2">SEV-2</span><span class="ticket-q">You need to give 40 branch offices connectivity to Azure with minimal ongoing operational overhead. Hub &amp; spoke or vWAN?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <p>Virtual WAN — at 40 branches, manually managing VPN/ExpressRoute gateways, peerings, and routing tables per hub in a DIY hub-and-spoke becomes a full-time job and a common source of routing mistakes. vWAN's managed hubs give any-to-any transitive routing between branches and VNets out of the box, which is exactly the problem at this scale.</p>
+      <div class="ticket-tags"><span class="tag blue">design</span></div>
+    </div>
+  </div>
+<div class="ticket" data-tags="networking" data-sev="2">
+    <div class="ticket-head"><span class="ticket-id">NET-710</span><span class="sev-badge s2">SEV-2</span><span class="ticket-q">A new NSG rule was deployed and now health probes to a VM's backend pool are failing intermittently in the Load Balancer.</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <p>Azure Load Balancer health probes originate from a special virtual IP (168.63.129.16) — a common mistake is an NSG rule that blocks it without realizing that's the platform's own probe source, not "an unknown IP" to lock down. Confirm the NSG still allows the AzureLoadBalancer service tag; if it was recently tightened to explicit IPs, that's very likely the regression.</p>
+      <div class="ticket-tags"><span class="tag blue">troubleshooting</span></div>
+    </div>
+  </div>
+<h3 class="bank-subhead" data-group="identity"><span class="dot" style="background:var(--k8s);"></span>Identity & Security</h3>
+<div class="ticket" data-tags="identity" data-sev="1">
+    <div class="ticket-head"><span class="ticket-id">SEC-801</span><span class="sev-badge s1">SEV-1</span><span class="ticket-q">A pipeline service principal has Owner on the whole subscription. Security flags it in an audit. How do you remediate without breaking the pipeline?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <ul>
+        <li>Inventory what the pipeline actually does — deploy to two resource groups, read from a storage account, write to a container registry.</li>
+        <li>Replace the broad Owner grant with scoped custom or built-in roles at the resource group level covering exactly those actions (e.g. Contributor on RG A/B, AcrPush on the registry).</li>
+        <li>Where possible, replace the service principal with a <strong>federated workload identity</strong> (OIDC trust between the CI system and Entra ID) so there's no long-lived client secret to leak at all.</li>
+      </ul>
+      <div class="resolution-box"><p class="sub">Resolution</p><p>Scope the role down to least privilege per resource, migrate the credential to workload identity federation, and add an Azure Policy that denies new role assignments of Owner at subscription scope going forward so this doesn't quietly recur.</p></div>
+      <div class="pitfall-box"><p class="sub">Pitfall</p><p>Removing Owner without first confirming every action the pipeline performs — you will find out what it needed the hard way, mid-incident, if you skip the inventory step.</p></div>
+      <div class="ticket-tags"><span class="tag violet">rbac</span><span class="tag red">security</span></div>
+    </div>
+  </div>
+<div class="ticket" data-tags="identity" data-sev="2">
+    <div class="ticket-head"><span class="ticket-id">SEC-802</span><span class="sev-badge s2">SEV-2</span><span class="ticket-q">An application VM needs to read secrets from Key Vault. Walk through the secure way to wire that up.</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <p>Enable a <strong>system-assigned Managed Identity</strong> on the VM. Grant that identity an RBAC role (e.g. Key Vault Secrets User) scoped to just that vault — not the older access-policy model, which is being phased out in favor of RBAC for Key Vault. The application code calls the Key Vault SDK, which silently obtains a token via the instance metadata endpoint — no connection string, no secret, ever lands in app config or environment variables. Rotate underlying secrets in the vault itself; the app always reads current values, so a secret rotation needs no app redeploy.</p>
+      <div class="ticket-tags"><span class="tag blue">managed-identity</span><span class="tag violet">key-vault</span></div>
+    </div>
+  </div>
+<div class="ticket" data-tags="identity" data-sev="2">
+    <div class="ticket-head"><span class="ticket-id">SEC-803</span><span class="sev-badge s2">SEV-2</span><span class="ticket-q">Explain PIM activation end to end for a scenario where an engineer needs 2 hours of Contributor access to fix a production issue at 11pm.</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <ul>
+        <li>Engineer is pre-assigned as <strong>eligible</strong> (not active) for the Contributor role on the target scope.</li>
+        <li>At 11pm they open PIM and request activation: supply a justification, optionally require MFA re-confirmation, and set a duration up to the policy's max (say, 4h).</li>
+        <li>If approval is configured, a designated approver is notified and must approve before the role becomes active; some orgs allow self-activation with just MFA + justification for genuine break-glass scenarios.</li>
+        <li>The role auto-expires at the end of the window — no manual revocation step to forget.</li>
+        <li>Every activation is logged with who, when, why, and for how long — that audit trail is the actual point.</li>
+      </ul>
+      <div class="callout tip"><div class="ico">i</div><p><strong>Interview line that lands:</strong> "PIM turns 'who has access' into 'who is currently using access, and why' — that's the difference auditors actually care about."</p></div>
+      <div class="ticket-tags"><span class="tag violet">pim</span><span class="tag amber">access</span></div>
+    </div>
+  </div>
+<div class="ticket" data-tags="identity" data-sev="2">
+    <div class="ticket-head"><span class="ticket-id">SEC-804</span><span class="sev-badge s2">SEV-2</span><span class="ticket-q">Defender for Cloud shows a "Secure Score" that dropped 8 points overnight. How do you investigate and prioritize?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <p>Open the Recommendations blade filtered to "unhealthy" resources changed in the last 24h — new resources deployed without encryption, an NSG opened to 0.0.0.0/0, or an expired certificate are typical causes. Prioritize by the recommendation's actual risk weighting (not alphabetically) — Defender weights recommendations by exploitability and blast radius, so a public storage account with sensitive data outranks a missing tag every time. Fix the highest-weighted item first, then check whether it was a one-off manual change (points to needing Azure Policy to prevent recurrence) or came through IaC (points to a pipeline gate that should have caught it, e.g. a Checkov/tfsec scan).</p>
+      <div class="ticket-tags"><span class="tag red">defender</span><span class="tag amber">posture</span></div>
+    </div>
+  </div>
+<div class="ticket" data-tags="identity" data-sev="3">
+    <div class="ticket-head"><span class="ticket-id">SEC-805</span><span class="sev-badge s3">SEV-3</span><span class="ticket-q">What's the difference between Azure RBAC and Entra ID roles (like Global Administrator)?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <p><strong>Entra ID roles</strong> control the directory itself — creating users, managing app registrations, resetting passwords, configuring Conditional Access. <strong>Azure RBAC</strong> controls access to Azure resources — VMs, storage, resource groups, subscriptions. A Global Administrator does not automatically have access to Azure resources; that's a deliberate separation. The trap: someone assumes Global Admin equals "full access to everything," including subscriptions — it doesn't, unless that admin explicitly elevates access to manage Azure resources, which is itself a logged, auditable action.</p>
+      <div class="ticket-tags"><span class="tag violet">fundamentals</span></div>
+    </div>
+  </div>
+<div class="ticket" data-tags="identity" data-sev="2">
+    <div class="ticket-head"><span class="ticket-id">SEC-806</span><span class="sev-badge s2">SEV-2</span><span class="ticket-q">A secret was accidentally committed to a Git repo and merged to main. What's your response?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <ul>
+        <li><strong>Rotate first, clean up second</strong> — the secret is compromised the moment it's pushed, regardless of repo visibility; assume it's already been scraped. Rotate the credential in Key Vault / the source system immediately.</li>
+        <li>Purge it from Git history (filter-repo / BFG) — but understand this alone does not un-compromise it, it only stops future clones from carrying it.</li>
+        <li>Root-cause: why didn't a pre-commit or pipeline secrets-scanning gate (e.g. GitLab secret detection, gitleaks) catch this before merge — that gate is the actual preventive fix.</li>
+      </ul>
+      <div class="pitfall-box"><p class="sub">Pitfall</p><p>Spending the first 20 minutes scrubbing Git history while the live credential is still valid and exploitable. Rotation is always step one.</p></div>
+      <div class="ticket-tags"><span class="tag red">devsecops</span><span class="tag amber">incident</span></div>
+    </div>
+  </div>
+<div class="ticket" data-tags="identity" data-sev="2">
+    <div class="ticket-head"><span class="ticket-id">SEC-807</span><span class="sev-badge s2">SEV-2</span><span class="ticket-q">Design Conditional Access for a workforce that includes contractors on unmanaged devices, without blocking legitimate business travel.</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <p>Use risk- and context-based policies rather than a blunt country block: require compliant/hybrid-joined device <em>or</em> MFA for full-time employees; for contractors on unmanaged devices, require MFA plus restrict to browser-based access with no download (via Conditional Access App Control / session controls) rather than a native client with full sync. Layer in Identity Protection's sign-in risk score so an atypical-location sign-in triggers step-up authentication instead of an outright block — this handles genuine travel without exempting risky sign-ins.</p>
+      <div class="ticket-tags"><span class="tag blue">entra-id</span><span class="tag violet">design</span></div>
+    </div>
+  </div>
+<div class="ticket" data-tags="identity" data-sev="3">
+    <div class="ticket-head"><span class="ticket-id">SEC-808</span><span class="sev-badge s3">SEV-3</span><span class="ticket-q">When would you choose a user-assigned Managed Identity over a system-assigned one?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <p>System-assigned is tied 1:1 to the resource's lifecycle — created and destroyed with it, simplest for a single VM. User-assigned is a standalone identity you create once and attach to multiple resources (e.g. every node in a scale set, or a Function App and its paired Logic App that both need the same downstream permissions) — useful when identity needs to persist independent of any one resource being recreated, or when several resources should share exactly the same permission set for easier auditing.</p>
+      <div class="ticket-tags"><span class="tag blue">managed-identity</span></div>
+    </div>
+  </div>
+<div class="ticket" data-tags="identity" data-sev="2">
+    <div class="ticket-head"><span class="ticket-id">SEC-809</span><span class="sev-badge s2">SEV-2</span><span class="ticket-q">Leadership asks for a way to guarantee every new subscription automatically gets baseline security controls without relying on engineers remembering to configure them. What do you build?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <p>Azure Policy initiatives (grouped policy sets) assigned at the <strong>management group</strong> level, not per-subscription — new subscriptions inherit the assignment automatically the moment they're placed under that management group. Use a mix of <code>Deny</code> (block non-compliant resources outright, e.g. public storage) and <code>DeployIfNotExists</code> (auto-remediate, e.g. attach diagnostic settings or enable Defender plans on anything that lands without them). This is the mechanism that makes a landing zone's guardrails self-enforcing instead of a checklist someone has to remember.</p>
+      <div class="ticket-tags"><span class="tag amber">policy</span><span class="tag violet">landing-zone</span></div>
+    </div>
+  </div>
+<div class="ticket" data-tags="identity" data-sev="2">
+    <div class="ticket-head"><span class="ticket-id">SEC-810</span><span class="sev-badge s2">SEV-2</span><span class="ticket-q">A Key Vault holds secrets used by 30 applications. How do you avoid it becoming a single point of failure or a blast-radius risk?</span><span class="ticket-chev">▶</span></div>
+    <div class="ticket-body">
+      <p>Don't use one vault for everything indiscriminately: segment vaults by sensitivity/environment/team (e.g. per application or per environment) so an over-broad RBAC grant or a compromised identity doesn't expose every secret in the estate — a single shared vault means one Key Vault Secrets User role handed out too widely equals blanket access. For availability, Key Vault is zone-redundant within a region by default on Premium/supported tiers; for DR, enable soft-delete and purge protection (mandatory for production) so accidental or malicious deletion is recoverable, and replicate critical secrets to a paired-region vault referenced by the DR runbook.</p>
+      <div class="ticket-tags"><span class="tag violet">key-vault</span><span class="tag blue">design</span></div>
+    </div>
+  </div>
+</div>
+
+</main>
+<div class="shell">
+  <div class="module-nav">
+    <a href="azure-identity-security.html"><div class="lbl">&larr; Previous module</div><div class="ttl">Identity & Security</div></a>
+    <div></div>
+    </div>
+</div>
+<footer class="site-footer">
+  Built for interview prep &middot; 10 modules &middot; scenario-first, visual-first &middot; <a href="scenarios.html">jump to the full scenario bank &rarr;</a>
+</footer>
+<script src="assets/main.js"></script>
+</body>
+</html>
